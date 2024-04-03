@@ -1,5 +1,7 @@
-[![Maven Central Version](https://img.shields.io/maven-central/v/com.power4j.tile/tile)](https://central.sonatype.com/artifact/com.power4j.tile/tile)
+[![Maven Central Version](https://img.shields.io/maven-central/v/com.power4j.tile/tile-parent)](https://central.sonatype.com/artifact/com.power4j.tile/tile-parent)
 
-- `tile-build`: build management
-- `tile-core`: the default library you want to publish
+modules:
+
+- `tile-util`: utils 
+- `tile-concept`: programming concept
 - `tile-dependencies`: BOM used by library users
