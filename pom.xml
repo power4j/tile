@@ -64,7 +64,7 @@
         <!-- library versions -->
         <spring-boot.version>3.2.4</spring-boot.version>
         <slf4j.version>2.0.12</slf4j.version>
-        <lombook.version>1.18.28</lombook.version>
+        <lombook.version>1.18.32</lombook.version>
         <commons-io.version>2.16.0</commons-io.version>
         <commons-codec.version>1.16.1</commons-codec.version>
         <commons-lang3.version>3.14.0</commons-lang3.version>
