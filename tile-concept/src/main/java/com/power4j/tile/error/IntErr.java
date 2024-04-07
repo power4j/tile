@@ -24,7 +24,7 @@ import org.springframework.lang.Nullable;
  */
 public class IntErr extends ErrValue<Integer> implements Err {
 
-	IntErr(int code, @Nullable String message, @Nullable Err source) {
+	protected IntErr(int code, @Nullable String message, @Nullable Err source) {
 		super(code, message, source);
 	}
 

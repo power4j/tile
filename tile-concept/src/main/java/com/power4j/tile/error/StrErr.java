@@ -24,7 +24,7 @@ import org.springframework.lang.Nullable;
  */
 public class StrErr extends ErrValue<String> implements Err {
 
-	StrErr(String code, @Nullable String message, @Nullable Err source) {
+	protected StrErr(String code, @Nullable String message, @Nullable Err source) {
 		super(code, message, source);
 	}
 
