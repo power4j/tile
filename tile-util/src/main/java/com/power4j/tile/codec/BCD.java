@@ -43,11 +43,11 @@ public class BCD {
 	 * </pre>
 	 * @param value Number that needs to be converted
 	 * @return BCD encoded number
-	 * @throws IllegalArgumentException if input is not a number
+	 * @throws EncodeException if input is not a number
 	 */
 	public static byte[] encode(String value) {
 		if (!isBcdString(value)) {
-			throw new IllegalArgumentException("Can only encode numerical strings");
+			throw new EncodeException("Can only encode numerical strings");
 		}
 
 		final byte[] bcd = new byte[(value.length() + 1) / COMPRESS];
@@ -70,15 +70,15 @@ public class BCD {
 	/**
 	 * Encode value to BCD encoded bytes (big endian) <pre>
 	 *     encode(BigInteger.ZERO)                -> [0x0]
-	 *     BCD.encode(BigInteger.ONE.negate())    -> error
+	 *     BCD.encode(BigInteger.ONE.negate())    -> EncodeException
 	 * </pre>
 	 * @param value number
 	 * @return BCD encoded number
-	 * @throws IllegalArgumentException if input is negative
+	 * @throws EncodeException if input is negative
 	 */
 	public static byte[] encode(BigInteger value) {
 		if (value.signum() == -1) {
-			throw new IllegalArgumentException("Only non-negative values are supported");
+			throw new EncodeException("Only non-negative values are supported");
 		}
 		if (value.bitLength() > 63) {
 			return encode(value.toString());
@@ -92,19 +92,19 @@ public class BCD {
 	 * Encode value to BCD encoded bytes (big endian) in a byte array of a specific length
 	 * <pre>
 	 *     encode(BigInteger.ZERO,2)                 -> [0x00, 0x00]
-	 *     BCD.encode(BigInteger.valueOf(100), 1)    -> error
+	 *     BCD.encode(BigInteger.valueOf(100), 1)    -> EncodeException
 	 * </pre>
 	 * @param value number
 	 * @param length length of the byte array
 	 * @return BCD encoded number
-	 * @throws IllegalArgumentException if input is negative or does not fit in byte array
+	 * @throws EncodeException if input is negative or does not fit in byte array
 	 */
 	public static byte[] encode(BigInteger value, int length) {
 		if (value.signum() == -1) {
-			throw new IllegalArgumentException("Only non-negative values are supported");
+			throw new EncodeException("Only non-negative values are supported");
 		}
 		else if (value.bitLength() > length * Byte.SIZE) {
-			throw new IllegalArgumentException("Value does not fit in byte array of length" + length);
+			throw new EncodeException("Value does not fit in byte array of length" + length);
 		}
 		if (value.bitLength() > 63) {
 			return encode(String.format("%0" + (length * 2) + "d", value));
@@ -123,11 +123,11 @@ public class BCD {
 	 * @param value number
 	 * @param length length of the byte array
 	 * @return BCD encoded number
-	 * @throws IllegalArgumentException if input is negative or does not fit in byte array
+	 * @throws EncodeException if input is negative or does not fit in byte array
 	 */
 	public static byte[] encode(long value, int length) {
 		if (value < 0) {
-			throw new IllegalArgumentException("Only non-negative values are supported");
+			throw new EncodeException("Only non-negative values are supported");
 		}
 		else if (value == 0) {
 			return new byte[length];
@@ -173,12 +173,12 @@ public class BCD {
 	 *     BCD.decode(new byte[] { 0x02, 0x31 }).intValue()   -> 231
 	 *     BCD.decode(new byte[] { 0x31 }).intValue()         -> 31
 	 *     BCD.decode(new byte[] { 0x0 }).intValue()          -> 0
-	 *     BCD.decode(new byte[] {-48 })                      -> error
-	 *     BCD.decode(new byte[] { 0x0d })                    -> error
+	 *     BCD.decode(new byte[] {-48 })                      -> DecodeException
+	 *     BCD.decode(new byte[] { 0x0d })                    -> DecodeException
 	 * </pre>
 	 * @param bcd BCD encoded bytes
 	 * @return encoded number
-	 * @throws IllegalArgumentException if an illegal byte is detected
+	 * @throws DecodeException if an illegal byte is detected
 	 */
 	public static BigInteger decode(byte[] bcd) {
 		BigInteger value = BigInteger.ZERO;
@@ -187,7 +187,7 @@ public class BCD {
 			final int low = (int) bcd[i] & 0xF;
 
 			if (high > MAX_NUMBER || low > MAX_NUMBER) {
-				throw new IllegalArgumentException(String.format("Illegal byte %x%x at %d", high, low, i));
+				throw new DecodeException(String.format("Illegal byte %x%x at %d", high, low, i));
 			}
 
 			value = value.multiply((BigInteger.TEN)).add(BigInteger.valueOf(high));
@@ -207,7 +207,7 @@ public class BCD {
 	 * @param bcd BCD encoded bytes
 	 * @param stripLeadingZero strip leading zero if value is of odd length
 	 * @return encoded number as String
-	 * @throws IllegalArgumentException if an illegal byte is detected
+	 * @throws DecodeException if an illegal byte is detected
 	 */
 	public static String decodeAsString(byte[] bcd, boolean stripLeadingZero) {
 		final StringBuilder buf = new StringBuilder(bcd.length * 2);
@@ -216,7 +216,7 @@ public class BCD {
 			final int low = (int) bcd[i] & 0xF;
 
 			if (high > MAX_NUMBER || low > MAX_NUMBER) {
-				throw new IllegalArgumentException(String.format("Illegal byte %x%x at %d", high, low, i));
+				throw new DecodeException(String.format("Illegal byte %x%x at %d", high, low, i));
 			}
 			buf.append((char) (0x30 | high));
 			buf.append((char) (0x30 | low));
