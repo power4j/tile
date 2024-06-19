@@ -30,7 +30,7 @@
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
-    <description>Library BOM</description>
+    <description>tile util</description>
 
     <dependencies>
         <dependency>
@@ -54,34 +54,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>flatten-maven-plugin</artifactId>
-                <inherited>false</inherited>
-                <executions>
-                    <execution>
-                        <!-- Flatten and simplify our own POM for install/deploy -->
-                        <id>flatten</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>flatten</goal>
-                        </goals>
-                        <configuration>
-                            <updatePomFile>true</updatePomFile>
-                            <flattenMode>bom</flattenMode>
-                            <pomElements>
-                                <properties>remove</properties>
-                                <distributionManagement>remove</distributionManagement>
-                                <dependencyManagement>resolve</dependencyManagement>
-                            </pomElements>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
