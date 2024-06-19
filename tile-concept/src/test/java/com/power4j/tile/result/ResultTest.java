@@ -252,7 +252,7 @@ class ResultTest {
 
 		lh = Result.ok(1);
 		rh = Result.ok(1L);
-		Assertions.assertEquals(lh, rh);
+		Assertions.assertNotEquals(lh, rh);
 		Assertions.assertEquals(lh.hashCode(), rh.hashCode());
 
 		lh = Result.ok("1");
