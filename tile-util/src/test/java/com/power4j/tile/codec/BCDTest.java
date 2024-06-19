@@ -48,13 +48,13 @@ class BCDTest {
 
 	@Test
 	public void encodeStringShouldThrowExceptionForEmptyString() {
-		Throwable thrown = assertThrows(IllegalArgumentException.class, () -> BCD.encode(""));
+		Throwable thrown = assertThrows(EncodeException.class, () -> BCD.encode(""));
 		assertEquals("Can only encode numerical strings", thrown.getMessage());
 	}
 
 	@Test
 	public void encodeStringShouldThrowExceptionForNonDecimalString() {
-		Throwable thrown = assertThrows(IllegalArgumentException.class, () -> BCD.encode("A"));
+		Throwable thrown = assertThrows(EncodeException.class, () -> BCD.encode("A"));
 		assertEquals("Can only encode numerical strings", thrown.getMessage());
 	}
 
@@ -75,7 +75,7 @@ class BCDTest {
 
 	@Test
 	public void encodeLongShouldThrowExceptionForNegative() {
-		Throwable thrown = assertThrows(IllegalArgumentException.class, () -> BCD.encode(-1));
+		Throwable thrown = assertThrows(EncodeException.class, () -> BCD.encode(-1));
 		assertEquals("Only non-negative values are supported", thrown.getMessage());
 	}
 
@@ -96,13 +96,13 @@ class BCDTest {
 
 	@Test
 	public void encodeLongWithLengthShouldThrowExceptionForNegative() {
-		Throwable thrown = assertThrows(IllegalArgumentException.class, () -> BCD.encode(-1, 2));
+		Throwable thrown = assertThrows(EncodeException.class, () -> BCD.encode(-1, 2));
 		assertEquals("Only non-negative values are supported", thrown.getMessage());
 	}
 
 	@Test
 	public void encodeLongWithLengthShouldThrowExceptionIfLengthIsTooSmall() {
-		Throwable thrown = assertThrows(IllegalArgumentException.class, () -> BCD.encode(100, 1));
+		Throwable thrown = assertThrows(EncodeException.class, () -> BCD.encode(100, 1));
 		assertEquals("Value does not fit in byte array of length 1", thrown.getMessage());
 	}
 
@@ -125,7 +125,7 @@ class BCDTest {
 
 	@Test
 	public void encodeBigIntegerShouldThrowExceptionForNegative() {
-		Throwable thrown = assertThrows(IllegalArgumentException.class, () -> BCD.encode(BigInteger.ONE.negate()));
+		Throwable thrown = assertThrows(EncodeException.class, () -> BCD.encode(BigInteger.ONE.negate()));
 		assertEquals("Only non-negative values are supported", thrown.getMessage());
 	}
 
@@ -148,13 +148,13 @@ class BCDTest {
 
 	@Test
 	public void encodeBigIntegerWithLengthShouldThrowExceptionForNegative() {
-		Throwable thrown = assertThrows(IllegalArgumentException.class, () -> BCD.encode(BigInteger.ONE.negate()));
+		Throwable thrown = assertThrows(EncodeException.class, () -> BCD.encode(BigInteger.ONE.negate()));
 		assertEquals("Only non-negative values are supported", thrown.getMessage());
 	}
 
 	@Test
 	public void encodeBigIntegerWithLengthShouldThrowExceptionIfLengthIsTooSmall() {
-		Throwable thrown = assertThrows(IllegalArgumentException.class, () -> BCD.encode(BigInteger.valueOf(100), 1));
+		Throwable thrown = assertThrows(EncodeException.class, () -> BCD.encode(BigInteger.valueOf(100), 1));
 		assertEquals("Value does not fit in byte array of length 1", thrown.getMessage());
 	}
 
@@ -175,13 +175,13 @@ class BCDTest {
 
 	@Test
 	public void decodeShouldThrowExceptionOnHighNibble() {
-		Throwable thrown = assertThrows(IllegalArgumentException.class, () -> BCD.decode(new byte[] { -48 }));
+		Throwable thrown = assertThrows(DecodeException.class, () -> BCD.decode(new byte[] { -48 }));
 		assertEquals("Illegal byte d0 at 0", thrown.getMessage());
 	}
 
 	@Test
 	public void decodeShouldThrowExceptionOnLowNibble() {
-		Throwable thrown = assertThrows(IllegalArgumentException.class, () -> BCD.decode(new byte[] { 0x0d }));
+		Throwable thrown = assertThrows(DecodeException.class, () -> BCD.decode(new byte[] { 0x0d }));
 		assertEquals("Illegal byte 0d at 0", thrown.getMessage());
 	}
 
@@ -212,15 +212,13 @@ class BCDTest {
 
 	@Test
 	public void decodeAsStringShouldThrowExceptionOnHighNibble() {
-		Throwable thrown = assertThrows(IllegalArgumentException.class,
-				() -> BCD.decodeAsString(new byte[] { -48 }, true));
+		Throwable thrown = assertThrows(DecodeException.class, () -> BCD.decodeAsString(new byte[] { -48 }, true));
 		assertEquals("Illegal byte d0 at 0", thrown.getMessage());
 	}
 
 	@Test
 	public void decodeAsStringShouldThrowExceptionOnLowNibble() {
-		Throwable thrown = assertThrows(IllegalArgumentException.class,
-				() -> BCD.decodeAsString(new byte[] { 0x0d }, true));
+		Throwable thrown = assertThrows(DecodeException.class, () -> BCD.decodeAsString(new byte[] { 0x0d }, true));
 		assertEquals("Illegal byte 0d at 0", thrown.getMessage());
 	}
 

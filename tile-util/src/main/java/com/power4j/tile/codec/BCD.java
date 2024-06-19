@@ -142,7 +142,7 @@ public class BCD {
 			bcd[i] = (byte) b;
 		}
 		if (value != 0) {
-			throw new IllegalArgumentException("Value does not fit in byte array of length " + length);
+			throw new EncodeException("Value does not fit in byte array of length " + length);
 		}
 
 		return bcd;
@@ -155,11 +155,11 @@ public class BCD {
 	 * </pre>
 	 * @param value number
 	 * @return BCD encoded number
-	 * @throws IllegalArgumentException if input is negative
+	 * @throws EncodeException if input is negative
 	 */
 	public static byte[] encode(long value) {
 		if (value < 0) {
-			throw new IllegalArgumentException("Only non-negative values are supported");
+			throw new EncodeException("Only non-negative values are supported");
 		}
 		else if (value == 0) {
 			return new byte[1];
