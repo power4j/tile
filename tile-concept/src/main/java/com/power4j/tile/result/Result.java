@@ -35,6 +35,8 @@ import java.util.function.Supplier;
  */
 public class Result<T, E> implements Display {
 
+	private final static Result<?, ?> EMPTY = new Result<>(new Object(), null);
+
 	@Nullable
 	private final T value;
 
@@ -65,6 +67,16 @@ public class Result<T, E> implements Display {
 	}
 
 	/**
+	 * Success but no value
+	 * @return New Result object
+	 * @throws NullPointerException if value is null
+	 */
+	@SuppressWarnings("unchecked")
+	public static <E> Result<?, E> none() {
+		return (Result<?, E>) EMPTY;
+	}
+
+	/**
 	 * Provide an error
 	 * @param err The error object, can not be null
 	 * @return New Result object
@@ -78,6 +90,14 @@ public class Result<T, E> implements Display {
 	Result(@Nullable T value, @Nullable E error) {
 		this.value = value;
 		this.error = error;
+	}
+
+	/**
+	 * Create a copy of this
+	 * @return new {@code Result<T,E>}
+	 */
+	public Result<T, E> copy() {
+		return new Result<>(value, error);
 	}
 
 	/**

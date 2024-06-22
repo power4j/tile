@@ -245,6 +245,16 @@ class ResultTest {
 		Assertions.assertEquals(lh, rh);
 		Assertions.assertEquals(lh.hashCode(), rh.hashCode());
 
+		lh = Result.none();
+		rh = Result.none();
+		Assertions.assertEquals(lh, rh);
+		Assertions.assertEquals(lh.hashCode(), rh.hashCode());
+
+		lh = Result.none();
+		rh = lh.copy();
+		Assertions.assertEquals(lh, rh);
+		Assertions.assertEquals(lh.hashCode(), rh.hashCode());
+
 		lh = Result.ok(BigInteger.valueOf(100));
 		rh = Result.ok(BigInteger.valueOf(100));
 		Assertions.assertEquals(lh, rh);
