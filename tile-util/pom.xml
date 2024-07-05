@@ -55,4 +55,18 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <environmentVariables>
+                        <TILE_TEST_KEY_1>TEST</TILE_TEST_KEY_1>
+                        <TILE_SYS_KEY_1>SYS</TILE_SYS_KEY_1>
+                    </environmentVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
