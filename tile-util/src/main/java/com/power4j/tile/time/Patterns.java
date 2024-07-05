@@ -35,11 +35,9 @@ public interface Patterns {
 
 	String DATETIME_PURE = "yyyyMMddHHmmss";
 
-	String DATETIME_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-
 	String DATETIME_MS_PURE = "yyyyMMddHHmmssSSS";
 
-	String DATETIME_UTC_ZONE = "yyyy-MM-dd'T'HH:mm:ssZ";
+	String DATETIME_ISO8601_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
 	String DATETIME_ISO8601 = "yyyy-MM-dd HH:mm:ss,SSS";
 
