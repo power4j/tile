@@ -14,39 +14,31 @@
  * limitations under the License.
  */
 
-package com.power4j.tile.time;
+package com.power4j.tile.io;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import java.nio.ByteBuffer;
 
 /**
- * Formater patterns
- * <p>
- *
  * @author CJ (power4j@outlook.com)
  * @since 1.0
  */
-public interface Patterns {
+class CStrEncoderTest {
 
-	String YEAR = "yyyy";
+	@Test
+	void encodeWith() {
+		ByteBuffer buffer = ByteBuffer.allocate(4);
+		CStrEncoder.INSTANCE.encode("123", buffer);
+		Assertions.assertArrayEquals(new byte[] { 49, 50, 51, 0 }, buffer.array());
+	}
 
-	String YEAR_MONTH = "yyyy-MM";
-
-	String MONTH_DAY = "MM-dd";
-
-	String DATETIME = "yyyy-MM-dd HH:mm:ss";
-
-	String DATETIME_PURE = "yyyyMMddHHmmss";
-
-	String DATETIME_MS_PURE = "yyyyMMddHHmmssSSS";
-
-	String DATETIME_ISO8601_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-
-	String DATETIME_ISO8601 = "yyyy-MM-dd HH:mm:ss,SSS";
-
-	String DATE = "yyyy-MM-dd";
-
-	String DATE_PURE = "yyyyMMdd";
-
-	String TIME = "HH:mm:ss";
-
-	String TIME_PURE = "HHmmss";
+	@Test
+	void encodeWithWithLimit() {
+		ByteBuffer buffer = ByteBuffer.allocate(3);
+		CStrEncoder.INSTANCE.encodeWith("123", buffer, 3);
+		Assertions.assertArrayEquals(new byte[] { 49, 50, 0 }, buffer.array());
+	}
 
 }

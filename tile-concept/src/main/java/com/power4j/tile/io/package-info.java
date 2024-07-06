@@ -14,39 +14,14 @@
  * limitations under the License.
  */
 
-package com.power4j.tile.time;
-
 /**
- * Formater patterns
- * <p>
- *
  * @author CJ (power4j@outlook.com)
+ * @date 2021/6/2
  * @since 1.0
  */
-public interface Patterns {
+@NonNullApi
+@NonNullFields
+package com.power4j.tile.io;
 
-	String YEAR = "yyyy";
-
-	String YEAR_MONTH = "yyyy-MM";
-
-	String MONTH_DAY = "MM-dd";
-
-	String DATETIME = "yyyy-MM-dd HH:mm:ss";
-
-	String DATETIME_PURE = "yyyyMMddHHmmss";
-
-	String DATETIME_MS_PURE = "yyyyMMddHHmmssSSS";
-
-	String DATETIME_ISO8601_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-
-	String DATETIME_ISO8601 = "yyyy-MM-dd HH:mm:ss,SSS";
-
-	String DATE = "yyyy-MM-dd";
-
-	String DATE_PURE = "yyyyMMdd";
-
-	String TIME = "HH:mm:ss";
-
-	String TIME_PURE = "HHmmss";
-
-}
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

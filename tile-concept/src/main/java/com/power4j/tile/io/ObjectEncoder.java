@@ -14,39 +14,31 @@
  * limitations under the License.
  */
 
-package com.power4j.tile.time;
+package com.power4j.tile.io;
+
+import org.springframework.lang.Nullable;
+
+import java.nio.ByteBuffer;
 
 /**
- * Formater patterns
- * <p>
- *
  * @author CJ (power4j@outlook.com)
  * @since 1.0
  */
-public interface Patterns {
+public interface ObjectEncoder<T, C> {
 
-	String YEAR = "yyyy";
+	/**
+	 * Write value to byte buffer
+	 * @param value value
+	 */
+	default void encode(T value, ByteBuffer buffer) {
+		encodeWith(value, buffer, null);
+	}
 
-	String YEAR_MONTH = "yyyy-MM";
-
-	String MONTH_DAY = "MM-dd";
-
-	String DATETIME = "yyyy-MM-dd HH:mm:ss";
-
-	String DATETIME_PURE = "yyyyMMddHHmmss";
-
-	String DATETIME_MS_PURE = "yyyyMMddHHmmssSSS";
-
-	String DATETIME_ISO8601_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-
-	String DATETIME_ISO8601 = "yyyy-MM-dd HH:mm:ss,SSS";
-
-	String DATE = "yyyy-MM-dd";
-
-	String DATE_PURE = "yyyyMMdd";
-
-	String TIME = "HH:mm:ss";
-
-	String TIME_PURE = "HHmmss";
+	/**
+	 * Write value to byte buffer
+	 * @param value value
+	 * @param context context used for encode
+	 */
+	void encodeWith(T value, ByteBuffer buffer, @Nullable C context);
 
 }

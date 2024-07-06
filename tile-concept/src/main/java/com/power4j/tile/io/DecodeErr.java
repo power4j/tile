@@ -14,39 +14,30 @@
  * limitations under the License.
  */
 
-package com.power4j.tile.time;
+package com.power4j.tile.io;
+
+import com.power4j.tile.error.Err;
+import com.power4j.tile.error.IntErr;
+import org.springframework.lang.Nullable;
 
 /**
- * Formater patterns
- * <p>
- *
  * @author CJ (power4j@outlook.com)
  * @since 1.0
  */
-public interface Patterns {
+public class DecodeErr extends IntErr {
 
-	String YEAR = "yyyy";
+	public static final int CODE = 1;
 
-	String YEAR_MONTH = "yyyy-MM";
+	protected DecodeErr(@Nullable String message, @Nullable Err source) {
+		super(CODE, message, source);
+	}
 
-	String MONTH_DAY = "MM-dd";
+	public static DecodeErr of(@Nullable String message, @Nullable Err source) {
+		return new DecodeErr(message, source);
+	}
 
-	String DATETIME = "yyyy-MM-dd HH:mm:ss";
-
-	String DATETIME_PURE = "yyyyMMddHHmmss";
-
-	String DATETIME_MS_PURE = "yyyyMMddHHmmssSSS";
-
-	String DATETIME_ISO8601_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-
-	String DATETIME_ISO8601 = "yyyy-MM-dd HH:mm:ss,SSS";
-
-	String DATE = "yyyy-MM-dd";
-
-	String DATE_PURE = "yyyyMMdd";
-
-	String TIME = "HH:mm:ss";
-
-	String TIME_PURE = "HHmmss";
+	public static DecodeErr of(@Nullable String message) {
+		return new DecodeErr(message, null);
+	}
 
 }

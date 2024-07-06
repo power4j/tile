@@ -14,39 +14,34 @@
  * limitations under the License.
  */
 
-package com.power4j.tile.time;
+package com.power4j.tile.io;
+
+import com.power4j.tile.result.Result;
+import org.springframework.lang.Nullable;
+
+import java.nio.ByteBuffer;
 
 /**
- * Formater patterns
- * <p>
- *
  * @author CJ (power4j@outlook.com)
  * @since 1.0
  */
-public interface Patterns {
+public interface ObjectDecoder<T, C> {
 
-	String YEAR = "yyyy";
+	/**
+	 * Decode value from byte buffer
+	 * @param buffer byte buffer to decode
+	 * @return Result<T,DecodeErr>
+	 */
+	default Result<T, DecodeErr> decode(ByteBuffer buffer) {
+		return decodeWith(buffer, null);
+	}
 
-	String YEAR_MONTH = "yyyy-MM";
-
-	String MONTH_DAY = "MM-dd";
-
-	String DATETIME = "yyyy-MM-dd HH:mm:ss";
-
-	String DATETIME_PURE = "yyyyMMddHHmmss";
-
-	String DATETIME_MS_PURE = "yyyyMMddHHmmssSSS";
-
-	String DATETIME_ISO8601_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-
-	String DATETIME_ISO8601 = "yyyy-MM-dd HH:mm:ss,SSS";
-
-	String DATE = "yyyy-MM-dd";
-
-	String DATE_PURE = "yyyyMMdd";
-
-	String TIME = "HH:mm:ss";
-
-	String TIME_PURE = "HHmmss";
+	/**
+	 * Decode value from byte buffer
+	 * @param buffer byte buffer to decode
+	 * @param context context used for decode
+	 * @return Result<T,DecodeErr>
+	 */
+	Result<T, DecodeErr> decodeWith(ByteBuffer buffer, @Nullable C context);
 
 }
