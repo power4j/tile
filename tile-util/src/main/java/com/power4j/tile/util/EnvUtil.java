@@ -18,7 +18,10 @@ package com.power4j.tile.util;
 
 import lombok.experimental.UtilityClass;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -45,7 +48,7 @@ public class EnvUtil {
 	}
 
 	/**
-	 * Lookup environment variables by prefix.
+	 * Lookup environment variables by regex match.
 	 * @param regex Key regex
 	 * @return Environment variables
 	 */
@@ -64,24 +67,47 @@ public class EnvUtil {
 	}
 
 	/**
+	 * Dump environment variables by key filter.
+	 * @param keyFilter Filter for key
+	 * @param out PrintStream
+	 * @throws IllegalStateException if an I/O error occurs during {@code output.write()}
+	 */
+	public void dumpKey(Predicate<String> keyFilter, OutputStream out) {
+		Map<String, String> map = lookupKey(keyFilter);
+		write(map, out);
+	}
+
+	/**
 	 * Dump environment variables by prefix.
 	 * @param keyPrefix Key prefix
 	 * @param out PrintStream
+	 * @throws IllegalStateException if an I/O error occurs during {@code output.write()}
 	 */
-	public void dumpKeyPrefix(String keyPrefix, PrintStream out) {
-		for (Map.Entry<String, String> entry : lookupKeyPrefix(keyPrefix).entrySet()) {
-			out.println(entry.getKey() + "=" + entry.getValue());
-		}
+	public void dumpKeyPrefix(String keyPrefix, OutputStream out) {
+		Map<String, String> map = lookupKeyPrefix(keyPrefix);
+		write(map, out);
 	}
 
 	/**
 	 * Dump environment variables by prefix.
 	 * @param regex Key regex
 	 * @param out PrintStream
+	 * @throws IllegalStateException if an I/O error occurs during {@code output.write()}
 	 */
-	public void dumpKeyPattern(String regex, PrintStream out) {
-		for (Map.Entry<String, String> entry : lookupKeyPattern(regex).entrySet()) {
-			out.println(entry.getKey() + "=" + entry.getValue());
+	public void dumpKeyPattern(String regex, OutputStream out) {
+		Map<String, String> map = lookupKeyPattern(regex);
+		write(map, out);
+	}
+
+	static void write(Map<String, String> map, OutputStream out) {
+		for (Map.Entry<String, String> entry : map.entrySet()) {
+			String line = entry.getKey() + "=" + entry.getValue();
+			try {
+				out.write(line.getBytes(StandardCharsets.UTF_8));
+			}
+			catch (IOException e) {
+				throw new IllegalStateException(e);
+			}
 		}
 	}
 
