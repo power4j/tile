@@ -45,6 +45,11 @@
                 <artifactId>tile-concept</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.power4j.tile</groupId>
+                <artifactId>tile-crypto</artifactId>
+                <version>${revision}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
