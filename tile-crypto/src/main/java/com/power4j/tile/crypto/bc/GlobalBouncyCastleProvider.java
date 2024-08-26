@@ -16,25 +16,29 @@
 
 package com.power4j.tile.crypto.bc;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import java.security.Security;
+import java.security.Provider;
 
 /**
  * @author CJ (power4j@outlook.com)
- * @since 3.0
+ * @since 1.0
  */
-public class Provider {
+public enum GlobalBouncyCastleProvider {
 
-	static {
-		addSecurityProvider();
+	INSTANCE;
+
+	private Provider provider;
+
+	GlobalBouncyCastleProvider() {
+		try {
+			this.provider = BCProvider.getOrAddProvider();
+		}
+		catch (NoClassDefFoundError | NoSuchMethodError e) {
+			// ignore
+		}
 	}
 
-	/**
-	 * 注册 Provider
-	 */
-	public static void addSecurityProvider() {
-		Security.addProvider(new BouncyCastleProvider());
+	public Provider getProvider() {
+		return this.provider;
 	}
 
 }
