@@ -20,7 +20,6 @@ import com.power4j.tile.crypto.core.BlockCipher;
 import com.power4j.tile.crypto.core.GeneralCryptoException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.lang.Nullable;
 
 import javax.crypto.Cipher;
@@ -41,7 +40,7 @@ import java.security.GeneralSecurityException;
  * @author CJ (power4j@outlook.com)
  * @since 1.0
  */
-public class Sm4 extends Provider implements BlockCipher {
+public class Sm4 implements BlockCipher {
 
 	public static final int BLOCK_SIZE = 16;
 
@@ -166,7 +165,7 @@ public class Sm4 extends Provider implements BlockCipher {
 	}
 
 	protected static Cipher createCipher(String transformation) throws GeneralSecurityException {
-		return Cipher.getInstance(transformation, BouncyCastleProvider.PROVIDER_NAME);
+		return Cipher.getInstance(transformation, GlobalBouncyCastleProvider.INSTANCE.getProvider());
 	}
 
 	protected static SecretKeySpec createKey(byte[] key) {

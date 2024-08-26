@@ -22,9 +22,10 @@ import com.power4j.tile.crypto.wrapper.HexEncoder;
 import com.power4j.tile.crypto.wrapper.InputDecoder;
 import com.power4j.tile.crypto.wrapper.OutputEncoder;
 import lombok.experimental.UtilityClass;
-import org.bouncycastle.crypto.digests.SM3Digest;
 import org.springframework.lang.Nullable;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 /**
@@ -32,7 +33,7 @@ import java.util.Arrays;
  * @since 1.0
  */
 @UtilityClass
-public class Sm3Util extends Provider {
+public class Sm3Util {
 
 	public static final int SM3_BYTES = 32;
 
@@ -54,17 +55,15 @@ public class Sm3Util extends Provider {
 	 * @return 摘要值,对于SM3算法来说是32字节
 	 */
 	public byte[] hash(byte[] input, int outputLen, @Nullable byte[] salt) {
-		SM3Digest digest = new SM3Digest();
+		MessageDigest digest = messageDigest("SM3");
 		if (salt != null && salt.length > 0) {
-			digest.update(salt, 0, salt.length);
+			digest.update(salt);
 		}
-		digest.update(input, 0, input.length);
-		byte[] hash = new byte[digest.getDigestSize()];
-		digest.doFinal(hash, 0);
+		digest.update(input);
 		if (outputLen > 0) {
-			hash = Arrays.copyOf(hash, outputLen);
+			return Arrays.copyOf(digest.digest(), outputLen);
 		}
-		return hash;
+		return digest.digest();
 	}
 
 	/**
@@ -160,6 +159,15 @@ public class Sm3Util extends Provider {
 		byte[] hashBytes = HexDecoder.DEFAULT.decode(hash);
 		byte[] saltBytes = salt == null ? null : HexDecoder.DEFAULT.decode(salt);
 		return verify(dataBytes, hashBytes, saltBytes);
+	}
+
+	static MessageDigest messageDigest(String algorithm) throws GeneralCryptoException {
+		try {
+			return MessageDigest.getInstance(algorithm, GlobalBouncyCastleProvider.INSTANCE.getProvider());
+		}
+		catch (NoSuchAlgorithmException e) {
+			throw new GeneralCryptoException(e.getMessage(), e);
+		}
 	}
 
 }
