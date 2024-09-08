@@ -71,7 +71,7 @@
         <lombook.version>1.18.34</lombook.version>
         <commons-io.version>2.16.1</commons-io.version>
         <commons-codec.version>1.17.1</commons-codec.version>
-        <commons-lang3.version>3.16.0</commons-lang3.version>
+        <commons-lang3.version>3.17.0</commons-lang3.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <bcprov-18.version>1.78.1</bcprov-18.version>
