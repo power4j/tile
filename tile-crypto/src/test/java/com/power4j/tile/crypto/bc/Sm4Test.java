@@ -17,7 +17,10 @@
 package com.power4j.tile.crypto.bc;
 
 import org.bouncycastle.util.encoders.Hex;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,6 +39,11 @@ class Sm4Test {
 
 		byte[] plain = sm4.decrypt(enc);
 		assertEquals("0001515641703792", Hex.toHexString(plain));
+
+		sm4 = Sm4.useEcbWithPadding("4aa697a7d8394925884767a5888a0c8a");
+		String rootEnc = Hex.toHexString(sm4.encrypt("root".getBytes(StandardCharsets.UTF_8)));
+		System.out.println("SM4 ECB Enc(root):" + rootEnc);
+		Assertions.assertEquals("683ed60b4f4bca8ec7962742a9183ce4", rootEnc);
 	}
 
 	@Test
@@ -46,6 +54,11 @@ class Sm4Test {
 
 		byte[] plain = sm4.decrypt(enc);
 		assertEquals("0001515641703792", Hex.toHexString(plain));
+
+		sm4 = Sm4.useCbcWithPadding("4aa697a7d8394925884767a5888a0c8a", "80c0b436a7a15b89e8622436c6d6f04e");
+		String rootEnc = Hex.toHexString(sm4.encrypt("root".getBytes(StandardCharsets.UTF_8)));
+		System.out.println("SM4 CBC Enc(root):" + rootEnc);
+		Assertions.assertEquals("6172a52d39ab724781bc835775ce2a1b", rootEnc);
 	}
 
 	@Test
