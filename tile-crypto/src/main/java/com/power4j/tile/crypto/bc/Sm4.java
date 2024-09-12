@@ -18,14 +18,9 @@ package com.power4j.tile.crypto.bc;
 
 import com.power4j.tile.crypto.core.BlockCipher;
 import com.power4j.tile.crypto.core.GeneralCryptoException;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
 import org.springframework.lang.Nullable;
 
-import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.GeneralSecurityException;
 
 /**
  * 安全建议<br>
@@ -40,7 +35,7 @@ import java.security.GeneralSecurityException;
  * @author CJ (power4j@outlook.com)
  * @since 1.0
  */
-public class Sm4 implements BlockCipher {
+public class Sm4 extends BouncyCastleBlockCipher implements BlockCipher {
 
 	public static final int BLOCK_SIZE = 16;
 
@@ -54,21 +49,8 @@ public class Sm4 implements BlockCipher {
 
 	private static final String SM4_OFB = "SM4/OFB/NoPadding";
 
-	private final String transformation;
-
-	private transient final SecretKeySpec key;
-
-	@Nullable
-	private transient final byte[] iv;
-
 	public Sm4(String transformation, byte[] key, @Nullable byte[] iv) {
-		if (key.length != BLOCK_SIZE) {
-			throw new IllegalArgumentException(
-					String.format("Invalid key length: %d, should be %d", key.length, BLOCK_SIZE));
-		}
-		this.key = createKey(key);
-		this.transformation = transformation;
-		this.iv = iv;
+		super(transformation, createKey(key, ALGO_NAME), iv == null ? null : new IvParameterSpec(iv));
 	}
 
 	public static Sm4 useEcbWithPadding(byte[] key) throws GeneralCryptoException {
@@ -122,73 +104,12 @@ public class Sm4 implements BlockCipher {
 		return useOfb(key, iv);
 	}
 
-	@Override
 	public String getAlgorithmName() {
 		return ALGO_NAME;
 	}
 
-	@Override
 	public int getBlockSize() {
 		return BLOCK_SIZE;
-	}
-
-	@Override
-	public byte[] encrypt(byte[] data) throws GeneralCryptoException {
-		try {
-			Cipher cipher = createCipher(transformation);
-			IvParameterSpec ivParameterSpec = null;
-			if (iv != null) {
-				ivParameterSpec = new IvParameterSpec(iv);
-			}
-			cipher.init(Cipher.ENCRYPT_MODE, key, ivParameterSpec);
-			return cipher.doFinal(data);
-		}
-		catch (GeneralSecurityException e) {
-			throw new GeneralCryptoException(e.getMessage(), e);
-		}
-	}
-
-	@Override
-	public byte[] decrypt(byte[] data) throws GeneralCryptoException {
-		try {
-			Cipher cipher = createCipher(transformation);
-			IvParameterSpec ivParameterSpec = null;
-			if (iv != null) {
-				ivParameterSpec = new IvParameterSpec(iv);
-			}
-			cipher.init(Cipher.DECRYPT_MODE, key, ivParameterSpec);
-			return cipher.doFinal(data);
-		}
-		catch (GeneralSecurityException e) {
-			throw new GeneralCryptoException(e.getMessage(), e);
-		}
-	}
-
-	protected static Cipher createCipher(String transformation) throws GeneralSecurityException {
-		return Cipher.getInstance(transformation, GlobalBouncyCastleProvider.INSTANCE.getProvider());
-	}
-
-	protected static SecretKeySpec createKey(byte[] key) {
-		return new SecretKeySpec(key, ALGO_NAME);
-	}
-
-	protected static byte[] decodeHexKey(String hex) {
-		try {
-			return Hex.decodeHex(hex);
-		}
-		catch (DecoderException e) {
-			throw new IllegalArgumentException(String.format("Not hex encoded key:%s", hex));
-		}
-	}
-
-	protected static byte[] decodeHexIv(String iv) {
-
-		try {
-			return Hex.decodeHex(iv);
-		}
-		catch (DecoderException e) {
-			throw new IllegalArgumentException(String.format("Not hex encoded iv:%s", iv));
-		}
 	}
 
 }

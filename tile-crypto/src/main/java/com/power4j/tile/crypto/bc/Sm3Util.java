@@ -55,7 +55,7 @@ public class Sm3Util {
 	 * @return 摘要值,对于SM3算法来说是32字节
 	 */
 	public byte[] hash(byte[] input, int outputLen, @Nullable byte[] salt) {
-		MessageDigest digest = messageDigest("SM3");
+		MessageDigest digest = messageDigest(Spec.ALGORITHM_SM3);
 		if (salt != null && salt.length > 0) {
 			digest.update(salt);
 		}

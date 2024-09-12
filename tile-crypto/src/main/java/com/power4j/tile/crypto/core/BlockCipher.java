@@ -28,18 +28,6 @@ import com.power4j.tile.crypto.wrapper.OutputEncoder;
 public interface BlockCipher {
 
 	/**
-	 * 算法名称
-	 * @return 算法名称
-	 */
-	String getAlgorithmName();
-
-	/**
-	 * 块的大小(字节)
-	 * @return 块的大小(字节)
-	 */
-	int getBlockSize();
-
-	/**
 	 * 加密
 	 * @param data 输入数据
 	 * @return 返回密文
