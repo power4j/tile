@@ -188,7 +188,12 @@ public class TextCipherBuilder {
 		IvParameterSpec ivParameterSpec = isEmpty(iv) ? null : new IvParameterSpec(iv);
 		BouncyCastleBlockCipher cipher = new BouncyCastleBlockCipher(transformation, keySpec, ivParameterSpec);
 
-		return new BouncyCastleTextCipher(inputEncoder, outputEncoder, cipher, hashFunction);
+		return BouncyCastleTextCipher.builder()
+			.cipher(cipher)
+			.inputEncoder(inputEncoder)
+			.outputEncoder(outputEncoder)
+			.hashFunction(hashFunction)
+			.build();
 
 	}
 

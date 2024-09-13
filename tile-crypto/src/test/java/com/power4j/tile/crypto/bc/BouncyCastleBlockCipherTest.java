@@ -17,11 +17,15 @@
 package com.power4j.tile.crypto.bc;
 
 import com.power4j.tile.crypto.core.CipherEnvelope;
+import com.power4j.tile.crypto.core.CipherStore;
+import com.power4j.tile.crypto.core.Verified;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.crypto.spec.IvParameterSpec;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.function.Function;
 
 /**
  * @author CJ (power4j@outlook.com)
@@ -51,6 +55,21 @@ class BouncyCastleBlockCipherTest {
 
 		byte[] decrypted = cipher.decrypt(envelope.getCipher());
 		Assertions.assertArrayEquals(plain, decrypted);
+	}
+
+	@Test
+	void decryptWithCheck() {
+		byte[] plain = "hello".getBytes(StandardCharsets.UTF_8);
+		Function<byte[], byte[]> hashFunc = (b) -> Arrays.copyOf(b, 8);
+		BouncyCastleBlockCipher cipher = new BouncyCastleBlockCipher("SM4/CBC/PKCS7Padding",
+				BouncyCastleBlockCipher.createKey(testKey, "SM4"), new IvParameterSpec(testIv));
+		CipherEnvelope envelope = cipher.encryptEnvelope(plain, hashFunc);
+
+		CipherStore store = new CipherStore(envelope.getCipher(), envelope.getChecksum());
+		Verified<byte[]> verified = cipher.decryptWithCheck(store,
+				(s, d) -> Arrays.equals(s.getChecksum(), hashFunc.apply(d)));
+		Assertions.assertTrue(verified.isPass());
+		Assertions.assertArrayEquals(plain, verified.getData());
 	}
 
 }

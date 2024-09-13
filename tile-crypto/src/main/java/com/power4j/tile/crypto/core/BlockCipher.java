@@ -21,6 +21,7 @@ import com.power4j.tile.crypto.wrapper.HexEncoder;
 import com.power4j.tile.crypto.wrapper.InputDecoder;
 import com.power4j.tile.crypto.wrapper.OutputEncoder;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -54,7 +55,24 @@ public interface BlockCipher {
 	 * @return 返回解密数据
 	 * @throws GeneralCryptoException
 	 */
-	byte[] decrypt(byte[] data) throws GeneralCryptoException;
+	default byte[] decrypt(byte[] data) throws GeneralCryptoException {
+		Verified<byte[]> result = decryptWithCheck(new CipherStore(data, null), (s, d) -> true);
+		if (result.isPass()) {
+			assert result.getData() != null;
+			return result.getData();
+		}
+		throw new GeneralCryptoException("Data verification failed");
+	}
+
+	/**
+	 * 解密并验证校验和
+	 * @param store 密文信息
+	 * @param verifier 校验函数,输入参数为密文信息,解密后的明文,校验通过返回 true，否则返回 false
+	 * @return 返回解密数据
+	 * @throws GeneralCryptoException
+	 */
+	Verified<byte[]> decryptWithCheck(CipherStore store, BiFunction<CipherStore, byte[], Boolean> verifier)
+			throws GeneralCryptoException;
 
 	/**
 	 * 加密,支持输入和输出的转换
@@ -93,6 +111,8 @@ public interface BlockCipher {
 	 * @param data 需要加密的数据
 	 * @return 加密后的16进制字符串
 	 * @throws GeneralCryptoException
+	 * @deprecated use {@link TextCipher } instead
+	 * @see TextCipherBuilder
 	 */
 	default String encryptHex(byte[] data) throws GeneralCryptoException {
 		return encryptWith(InputDecoder.NO_OP, HexEncoder.DEFAULT, data);
@@ -103,6 +123,8 @@ public interface BlockCipher {
 	 * @param data 需要解密的数据,16进制字符串格式
 	 * @return 解密后的数据
 	 * @throws GeneralCryptoException
+	 * @deprecated use {@link TextCipher } instead
+	 * @see TextCipherBuilder
 	 */
 	default byte[] decryptHex(String data) throws GeneralCryptoException {
 		return decryptWith(HexDecoder.DEFAULT, OutputEncoder.NO_OP, data);
