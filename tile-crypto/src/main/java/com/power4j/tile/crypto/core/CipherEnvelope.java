@@ -16,30 +16,38 @@
 
 package com.power4j.tile.crypto.core;
 
+import lombok.Builder;
+import lombok.Getter;
+import org.springframework.lang.Nullable;
+
+import java.util.Optional;
+
 /**
- * 针对文本数据的加密
- *
  * @author CJ (power4j@outlook.com)
- * @since 1.6
+ * @since 1.0
  */
-public interface TextEncrypt {
+@Getter
+@Builder
+public class CipherEnvelope {
 
-	/**
-	 * 加密
-	 * @param data 输入数据
-	 * @return 返回密文
-	 * @throws GeneralCryptoException
-	 */
-	default String encrypt(String data) throws GeneralCryptoException {
-		return encryptEnvelope(data).getCiphertext();
+	private final String algorithm;
+
+	private final String padding;
+
+	private final String mode;
+
+	@Nullable
+	private final byte[] iv;
+
+	private final byte[] cipher;
+
+	private final byte[] checksum;
+
+	public Optional<byte[]> getIvOptional() {
+		if (iv == null || iv.length == 0) {
+			return Optional.empty();
+		}
+		return Optional.of(iv);
 	}
-
-	/**
-	 * 加密
-	 * @param data 输入数据
-	 * @return CiphertextEnvelope
-	 * @throws GeneralCryptoException
-	 */
-	CiphertextEnvelope encryptEnvelope(String data) throws GeneralCryptoException;
 
 }

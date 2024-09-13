@@ -18,6 +18,7 @@ package com.power4j.tile.crypto.core;
 
 import com.power4j.tile.crypto.bc.BouncyCastleBlockCipher;
 import com.power4j.tile.crypto.bc.GlobalBouncyCastleProvider;
+import com.power4j.tile.crypto.bc.Sm3Util;
 import com.power4j.tile.crypto.bc.Spec;
 import com.power4j.tile.crypto.core.encode.Base64Encoder;
 import com.power4j.tile.crypto.core.encode.BufferEncoder;
@@ -32,7 +33,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.GeneralSecurityException;
-import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -40,6 +41,8 @@ import java.util.function.Supplier;
  * @since 1.6
  */
 public class TextCipherBuilder {
+
+	private static final Function<byte[], byte[]> HASH_NONE = b -> new byte[0];
 
 	private final String algorithmName;
 
@@ -53,7 +56,9 @@ public class TextCipherBuilder {
 
 	private Supplier<byte[]> keySupplier;
 
-	private @Nullable Supplier<byte[]> ivSupplier;
+	private Supplier<byte[]> ivSupplier = () -> null;
+
+	private Function<byte[], byte[]> hashFunction = HASH_NONE;
 
 	public TextCipherBuilder(String algorithmName, String mode, String padding) {
 		this.algorithmName = algorithmName;
@@ -101,13 +106,6 @@ public class TextCipherBuilder {
 		return this;
 	}
 
-	public TextCipherBuilder reverseEncoder() {
-		BufferEncoder tmp = this.inputEncoder;
-		this.inputEncoder = this.outputEncoder;
-		this.outputEncoder = tmp;
-		return this;
-	}
-
 	public TextCipherBuilder keySupplier(Supplier<byte[]> supplier) {
 		this.keySupplier = supplier;
 		return this;
@@ -150,6 +148,25 @@ public class TextCipherBuilder {
 		}
 	}
 
+	public TextCipherBuilder hashFunction(Function<byte[], byte[]> hashFunction) {
+		this.hashFunction = hashFunction;
+		return this;
+	}
+
+	public TextCipherBuilder hashSm3() {
+		this.hashFunction = (b) -> Sm3Util.hash(b, null);
+		return this;
+	}
+
+	public TextCipherBuilder reversedEncoder() {
+		return TextCipherBuilder.of(algorithmName, mode, padding)
+			.keySupplier(keySupplier)
+			.ivSupplier(ivSupplier)
+			.hashFunction(hashFunction)
+			.inputEncoding(outputEncoder)
+			.outputEncoding(inputEncoder);
+	}
+
 	public TextCipher build() {
 
 		if (isEmpty(algorithmName)) {
@@ -165,13 +182,13 @@ public class TextCipherBuilder {
 		if (isEmpty(key)) {
 			throw new IllegalArgumentException("key must not be empty");
 		}
-		byte[] iv = Optional.ofNullable(ivSupplier).map(Supplier::get).orElse(null);
+		byte[] iv = ivSupplier.get();
 		String transformation = BouncyCastleBlockCipher.transformation(algorithmName, mode, padding);
 		SecretKeySpec keySpec = BouncyCastleBlockCipher.createKey(key, algorithmName);
 		IvParameterSpec ivParameterSpec = isEmpty(iv) ? null : new IvParameterSpec(iv);
 		BouncyCastleBlockCipher cipher = new BouncyCastleBlockCipher(transformation, keySpec, ivParameterSpec);
 
-		return new BouncyCastleTextCipher(inputEncoder, outputEncoder, cipher);
+		return new BouncyCastleTextCipher(inputEncoder, outputEncoder, cipher, hashFunction);
 
 	}
 
@@ -213,9 +230,26 @@ public class TextCipherBuilder {
 
 		private final BouncyCastleBlockCipher cipher;
 
+		private final Function<byte[], byte[]> hashFunction;
+
 		@Override
 		public String encrypt(String data) throws GeneralCryptoException {
 			return outputEncoder.encode(encryptData(inputEncoder.decode(data)));
+		}
+
+		@Override
+		public CiphertextEnvelope encryptEnvelope(String data) throws GeneralCryptoException {
+			CipherEnvelope envelope = cipher.encryptEnvelope(inputEncoder.decode(data), hashFunction);
+			String iv = envelope.getIvOptional().map(outputEncoder::encode).orElse(null);
+			return CiphertextEnvelope.builder()
+				.encoding(outputEncoder.algorithm())
+				.algorithm(envelope.getAlgorithm())
+				.mode(envelope.getMode())
+				.padding(envelope.getPadding())
+				.ciphertext(outputEncoder.encode(envelope.getCipher()))
+				.iv(iv)
+				.checksum(outputEncoder.encode(envelope.getChecksum()))
+				.build();
 		}
 
 		@Override

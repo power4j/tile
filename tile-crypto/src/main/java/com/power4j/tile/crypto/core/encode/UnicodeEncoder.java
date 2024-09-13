@@ -50,4 +50,9 @@ public class UnicodeEncoder extends AbstractEncoder implements BufferEncoder {
 		return data.getBytes(charset);
 	}
 
+	@Override
+	public String algorithm() {
+		return "unicode/" + charset.name();
+	}
+
 }

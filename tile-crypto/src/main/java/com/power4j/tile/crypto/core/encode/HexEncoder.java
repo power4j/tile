@@ -50,4 +50,9 @@ public class HexEncoder extends AbstractEncoder implements BufferEncoder {
 		}
 	}
 
+	@Override
+	public String algorithm() {
+		return "hex";
+	}
+
 }

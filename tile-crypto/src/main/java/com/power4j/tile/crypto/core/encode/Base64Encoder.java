@@ -48,4 +48,9 @@ public class Base64Encoder extends AbstractEncoder implements BufferEncoder {
 		return Base64.decodeBase64(data);
 	}
 
+	@Override
+	public String algorithm() {
+		return "base64";
+	}
+
 }

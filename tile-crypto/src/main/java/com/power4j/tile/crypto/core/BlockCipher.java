@@ -21,6 +21,8 @@ import com.power4j.tile.crypto.wrapper.HexEncoder;
 import com.power4j.tile.crypto.wrapper.InputDecoder;
 import com.power4j.tile.crypto.wrapper.OutputEncoder;
 
+import java.util.function.Function;
+
 /**
  * @author CJ (power4j@outlook.com)
  * @since 1.0
@@ -33,7 +35,18 @@ public interface BlockCipher {
 	 * @return 返回密文
 	 * @throws GeneralCryptoException
 	 */
-	byte[] encrypt(byte[] data) throws GeneralCryptoException;
+	default byte[] encrypt(byte[] data) throws GeneralCryptoException {
+		return encryptEnvelope(data, (b) -> b).getCipher();
+	}
+
+	/**
+	 * 加密
+	 * @param data 输入数据
+	 * @param hash hash 函数
+	 * @return CipherEnvelope
+	 * @throws GeneralCryptoException
+	 */
+	CipherEnvelope encryptEnvelope(byte[] data, Function<byte[], byte[]> hash) throws GeneralCryptoException;
 
 	/**
 	 * 解密

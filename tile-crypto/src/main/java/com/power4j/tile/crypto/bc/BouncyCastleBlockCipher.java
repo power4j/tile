@@ -17,8 +17,8 @@
 package com.power4j.tile.crypto.bc;
 
 import com.power4j.tile.crypto.core.BlockCipher;
+import com.power4j.tile.crypto.core.CipherEnvelope;
 import com.power4j.tile.crypto.core.GeneralCryptoException;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.lang.Nullable;
@@ -27,12 +27,12 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.GeneralSecurityException;
+import java.util.function.Function;
 
 /**
  * @author CJ (power4j@outlook.com)
  * @since 1.6
  */
-@RequiredArgsConstructor
 public class BouncyCastleBlockCipher implements BlockCipher {
 
 	private final String transformation;
@@ -42,16 +42,37 @@ public class BouncyCastleBlockCipher implements BlockCipher {
 	@Nullable
 	private final IvParameterSpec iv;
 
+	private final String[] transformationParts;
+
+	public BouncyCastleBlockCipher(String transformation, SecretKeySpec key, @Nullable IvParameterSpec iv) {
+		this.transformation = transformation;
+		this.key = key;
+		this.iv = iv;
+		this.transformationParts = transformation.split("/");
+	}
+
 	@Override
-	public byte[] encrypt(byte[] data) throws GeneralCryptoException {
+	public CipherEnvelope encryptEnvelope(byte[] data, Function<byte[], byte[]> hash) throws GeneralCryptoException {
+		byte[] encrypted;
+		byte[] checksum;
 		try {
+			checksum = hash.apply(data);
 			Cipher cipher = createCipher(transformation);
 			cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-			return cipher.doFinal(data);
+			encrypted = cipher.doFinal(data);
 		}
 		catch (GeneralSecurityException e) {
 			throw new GeneralCryptoException(e.getMessage(), e);
 		}
+		byte[] ivBytes = iv == null ? null : iv.getIV();
+		return CipherEnvelope.builder()
+			.algorithm(transformationParts[0])
+			.mode(transformationParts[1])
+			.padding(transformationParts[2])
+			.iv(ivBytes)
+			.checksum(checksum)
+			.cipher(encrypted)
+			.build();
 	}
 
 	@Override

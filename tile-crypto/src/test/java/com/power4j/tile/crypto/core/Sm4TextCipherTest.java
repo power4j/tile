@@ -45,7 +45,7 @@ class Sm4TextCipherTest {
 				String hint = String.format("sm4Ecb encrypt:%s -> %s,decrypt:%s -> %s", inputEncoding, outputEncoding,
 						outputEncoding, inputEncoding);
 				TextCipher enc = builder.inputEncoding(inputEncoding).outputEncoding(outputEncoding).build();
-				TextCipher dec = builder.reverseEncoder().build();
+				TextCipher dec = builder.reversedEncoder().build();
 				String cipher = enc.encrypt(plain);
 				System.out.printf("[%s]%n plain = %s,cipher = %s%n", hint, plain, cipher);
 				Assertions.assertEquals(plain, dec.decrypt(cipher), hint);
@@ -61,7 +61,7 @@ class Sm4TextCipherTest {
 				String hint = String.format("sm4Cbc encrypt:%s -> %s,decrypt:%s -> %s", inputEncoding, outputEncoding,
 						outputEncoding, inputEncoding);
 				TextCipher enc = builder.inputEncoding(inputEncoding).outputEncoding(outputEncoding).build();
-				TextCipher dec = builder.reverseEncoder().build();
+				TextCipher dec = builder.reversedEncoder().build();
 				String cipher = enc.encrypt(plain);
 				System.out.printf("[%s]%n plain = %s,cipher = %s%n", hint, plain, cipher);
 				Assertions.assertEquals(plain, dec.decrypt(cipher), hint);
@@ -77,7 +77,7 @@ class Sm4TextCipherTest {
 				String hint = String.format("sm4Cfb encrypt:%s -> %s,decrypt:%s -> %s", inputEncoding, outputEncoding,
 						outputEncoding, inputEncoding);
 				TextCipher enc = builder.inputEncoding(inputEncoding).outputEncoding(outputEncoding).build();
-				TextCipher dec = builder.reverseEncoder().build();
+				TextCipher dec = builder.reversedEncoder().build();
 				String cipher = enc.encrypt(plain);
 				System.out.printf("[%s]%n plain = %s,cipher = %s%n", hint, plain, cipher);
 				Assertions.assertEquals(plain, dec.decrypt(cipher), hint);
@@ -93,12 +93,36 @@ class Sm4TextCipherTest {
 				String hint = String.format("sm4Ofb encrypt:%s -> %s,decrypt:%s -> %s", inputEncoding, outputEncoding,
 						outputEncoding, inputEncoding);
 				TextCipher enc = builder.inputEncoding(inputEncoding).outputEncoding(outputEncoding).build();
-				TextCipher dec = builder.reverseEncoder().build();
+				TextCipher dec = builder.reversedEncoder().build();
 				String cipher = enc.encrypt(plain);
 				System.out.printf("[%s]%n plain = %s,cipher = %s%n", hint, plain, cipher);
 				Assertions.assertEquals(plain, dec.decrypt(cipher), hint);
 			}
 		}
+	}
+
+	@Test
+	void envelopeTest() {
+
+		String plain = "hello";
+		TextCipherBuilder builder = TextCipherBuilder.sm4Cbc()
+			.keyHex(key)
+			.ivHex(iv)
+			.inputEncoding(BufferEncoding.UTF_8)
+			.outputEncoding(BufferEncoding.HEX)
+			.hashSm3();
+		CiphertextEnvelope envelope = builder.build().encryptEnvelope(plain);
+		System.out.println("encrypted envelope = " + envelope);
+		Assertions.assertNotNull(envelope.getEncoding());
+		Assertions.assertNotNull(envelope.getAlgorithm());
+		Assertions.assertNotNull(envelope.getMode());
+		Assertions.assertNotNull(envelope.getPadding());
+		Assertions.assertNotNull(envelope.getIv());
+		Assertions.assertNotNull(envelope.getCiphertext());
+		Assertions.assertNotNull(envelope.getChecksum());
+
+		String decrypted = builder.reversedEncoder().build().decrypt(envelope.getCiphertext());
+		Assertions.assertEquals(plain, decrypted);
 	}
 
 }

@@ -23,6 +23,12 @@ package com.power4j.tile.crypto.core.encode;
 public interface BufferEncoder {
 
 	/**
+	 * Encoding algorithm
+	 * @return algorithm name,e.g. "BASE64"
+	 */
+	String algorithm();
+
+	/**
 	 * byte[] -> String
 	 * @param data input bytes
 	 * @param offset offset to encode
