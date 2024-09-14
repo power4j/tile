@@ -44,7 +44,7 @@ public class Pools {
 	public KeyPool rotation(byte[]... keys) {
 		List<DynamicKey> list = new ArrayList<>(keys.length);
 		for (int i = 0; i < keys.length; i++) {
-			list.add(new DynamicKey(i, keys[i]));
+			list.add(new DynamicKey(Integer.toString(i), keys[i]));
 		}
 		return new RotationPool(list);
 	}
@@ -68,7 +68,7 @@ public class Pools {
 		}
 
 		public FixedPool(long id, byte[] key) {
-			this.key = new DynamicKey(id, key);
+			this.key = new DynamicKey(Long.toString(id), key);
 		}
 
 		@Override

@@ -49,7 +49,7 @@ class SimpleDynamicDecryptTest {
 	private final Function<byte[], byte[]> checksumCalculator = (b) -> Arrays.copyOf(b, 8);
 
 	@Test
-	void decrypt() {
+	void rotationDecryptTest() {
 		byte[] plain = "hello".getBytes(StandardCharsets.UTF_8);
 		KeyPool pool = Pools.rotation(testKey1, testKey2, testKey3);
 		SimpleDynamicDecrypt dec = DynamicDecryptBuilder.sm4Cbc()
@@ -69,6 +69,44 @@ class SimpleDynamicDecryptTest {
 
 		Assertions.assertTrue(result.success());
 		Assertions.assertEquals(3, result.getTried().size());
+		Assertions.assertArrayEquals(plain, result.requiredMatched().getData());
+	}
+
+	@Test
+	void timeBasedDecryptTest() {
+		byte[] plain = "hello".getBytes(StandardCharsets.UTF_8);
+		long time = System.currentTimeMillis();
+		int windowSize = 3;
+		int intervalSeconds = 60;
+		KeyPool pool = TimeBasedPool.ofSize(16)
+			.fillBytes(new byte[] { 0x01, 0x02, 0x03, 0x04 })
+			.windowSize(windowSize)
+			.intervalSeconds(intervalSeconds)
+			.build();
+
+		DynamicDecryptBuilder builder = DynamicDecryptBuilder.sm4Cbc()
+			.checksumCalculator(checksumCalculator)
+			.keyPool(pool)
+			.ivPool(Pools.fixed(testIv));
+
+		BlockCipher enc = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
+			.secretKey(testKey3)
+			.ivParameter(testIv)
+			.checksumCalculator(checksumCalculator)
+			.build();
+		CipherBlobEnvelope envelope = enc.encryptEnvelope(plain);
+		CipherBlob store = new CipherBlob(envelope.getCipher(), envelope.getChecksum());
+
+		DynamicDecryptResult result = builder.parameterSupplier(() -> time).simple().decrypt(store);
+		Assertions.assertTrue(result.success());
+		Assertions.assertArrayEquals(plain, result.requiredMatched().getData());
+
+		result = builder.parameterSupplier(() -> time + intervalSeconds * 1000 * windowSize).simple().decrypt(store);
+		Assertions.assertTrue(result.success());
+		Assertions.assertArrayEquals(plain, result.requiredMatched().getData());
+
+		result = builder.parameterSupplier(() -> time - intervalSeconds * 1000 * windowSize).simple().decrypt(store);
+		Assertions.assertTrue(result.success());
 		Assertions.assertArrayEquals(plain, result.requiredMatched().getData());
 	}
 

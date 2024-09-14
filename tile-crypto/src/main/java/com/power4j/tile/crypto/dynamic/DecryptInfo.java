@@ -29,7 +29,7 @@ public class DecryptInfo {
 
 	private final boolean matched;
 
-	private final long keyIndex;
+	private final String keyTag;
 
 	private final byte[] data;
 

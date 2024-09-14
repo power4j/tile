@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author CJ (power4j@outlook.com)
@@ -49,9 +50,11 @@ public class SimpleDynamicDecrypt implements DynamicDecrypt {
 
 	private final Function<byte[], byte[]> checksumCalculator;
 
+	private final Supplier<Long> paramterSupplier;
+
 	@Override
 	public DynamicDecryptResult decrypt(CipherBlob store) {
-		final long timestamp = System.currentTimeMillis();
+		final long timestamp = paramterSupplier.get();
 		List<DynamicKey> keyList = keyPool.decryptKeys(timestamp);
 		List<DynamicKey> ivList = ivPool.decryptKeys(timestamp);
 		if (keyList.isEmpty()) {
@@ -94,7 +97,7 @@ public class SimpleDynamicDecrypt implements DynamicDecrypt {
 			Verified<byte[]> verified = cipher.decrypt(store, false);
 			return DecryptInfo.builder()
 				.matched(verified.isPass())
-				.keyIndex(key.getIndex())
+				.keyTag(key.getTag())
 				.checksum(store.getChecksum())
 				.data(verified.getData())
 				.build();
