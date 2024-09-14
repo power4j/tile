@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-package com.power4j.tile.crypto.wrapper;
+package com.power4j.tile.crypto.utils;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
+import com.power4j.tile.crypto.core.GeneralCryptoException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author CJ (power4j@outlook.com)
  * @since 1.0
  */
-public class HexDecoder implements InputDecoder<String> {
+class CryptoUtilTest {
 
-	public static final HexDecoder DEFAULT = new HexDecoder();
-
-	@Override
-	public byte[] decode(String data) throws DecodeException {
-		try {
-			return Hex.decodeHex(data);
-		}
-		catch (DecoderException e) {
-			throw new DecodeException(e.getMessage(), e);
-		}
+	@Test
+	void shouldThrowIfValueIsInvalid() {
+		Assertions.assertThrows(GeneralCryptoException.class, () -> CryptoUtil.decodeHex("G", null));
+		Assertions.assertThrows(GeneralCryptoException.class, () -> CryptoUtil.decodeBase64("R", null));
 	}
 
 }

@@ -21,9 +21,6 @@ import com.power4j.tile.crypto.wrapper.HexEncoder;
 import com.power4j.tile.crypto.wrapper.InputDecoder;
 import com.power4j.tile.crypto.wrapper.OutputEncoder;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 /**
  * @author CJ (power4j@outlook.com)
  * @since 1.0
@@ -37,17 +34,16 @@ public interface BlockCipher {
 	 * @throws GeneralCryptoException
 	 */
 	default byte[] encrypt(byte[] data) throws GeneralCryptoException {
-		return encryptEnvelope(data, (b) -> b).getCipher();
+		return encryptEnvelope(data).getCipher();
 	}
 
 	/**
 	 * 加密
 	 * @param data 输入数据
-	 * @param hash hash 函数
 	 * @return CipherEnvelope
 	 * @throws GeneralCryptoException
 	 */
-	CipherEnvelope encryptEnvelope(byte[] data, Function<byte[], byte[]> hash) throws GeneralCryptoException;
+	CipherBlobEnvelope encryptEnvelope(byte[] data) throws GeneralCryptoException;
 
 	/**
 	 * 解密
@@ -56,23 +52,31 @@ public interface BlockCipher {
 	 * @throws GeneralCryptoException
 	 */
 	default byte[] decrypt(byte[] data) throws GeneralCryptoException {
-		Verified<byte[]> result = decryptWithCheck(new CipherStore(data, null), (s, d) -> true);
-		if (result.isPass()) {
-			assert result.getData() != null;
-			return result.getData();
+		Verified<byte[]> result = decrypt(new CipherBlob(data, null), true);
+		if (!result.isPass()) {
+			Throwable throwable = result.getCause();
+			if (throwable != null) {
+				if (throwable instanceof GeneralCryptoException) {
+					throw (GeneralCryptoException) throwable;
+				}
+				else {
+					throw new GeneralCryptoException(throwable);
+				}
+			}
+			throw new GeneralCryptoException("Data verification failed");
 		}
-		throw new GeneralCryptoException("Data verification failed");
+		assert result.getData() != null;
+		return result.getData();
 	}
 
 	/**
 	 * 解密并验证校验和
 	 * @param store 密文信息
-	 * @param verifier 校验函数,输入参数为密文信息,解密后的明文,校验通过返回 true，否则返回 false
+	 * @param skipCheck 是否跳过校验
 	 * @return 返回解密数据
 	 * @throws GeneralCryptoException
 	 */
-	Verified<byte[]> decryptWithCheck(CipherStore store, BiFunction<CipherStore, byte[], Boolean> verifier)
-			throws GeneralCryptoException;
+	Verified<byte[]> decrypt(CipherBlob store, boolean skipCheck) throws GeneralCryptoException;
 
 	/**
 	 * 加密,支持输入和输出的转换

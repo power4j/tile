@@ -16,8 +16,8 @@
 
 package com.power4j.tile.crypto.dynamic;
 
-import com.power4j.tile.crypto.bc.BouncyCastleBlockCipher;
 import com.power4j.tile.crypto.bc.Spec;
+import com.power4j.tile.crypto.utils.Validate;
 import org.springframework.lang.Nullable;
 
 import java.util.function.Function;
@@ -34,13 +34,11 @@ public class DynamicDecryptBuilder {
 
 	private final String padding;
 
-	@Nullable
 	private KeyPool keyPool;
 
-	@Nullable
 	private KeyPool ivPool;
 
-	private Function<byte[], byte[]> hashFunc;
+	private Function<byte[], byte[]> checksumCalculator;
 
 	public DynamicDecryptBuilder(String algorithmName, String mode, String padding) {
 		this.algorithmName = algorithmName;
@@ -52,20 +50,24 @@ public class DynamicDecryptBuilder {
 		return new DynamicDecryptBuilder(algorithmName, mode, padding);
 	}
 
+	public static DynamicDecryptBuilder sm4(String mode, String padding) {
+		return of(Spec.ALGORITHM_SM4, mode, padding);
+	}
+
 	public static DynamicDecryptBuilder sm4Ecb() {
-		return of(Spec.ALGORITHM_SM4, Spec.MODE_ECB, Spec.PADDING_PKCS7);
+		return sm4(Spec.MODE_ECB, Spec.PADDING_PKCS7);
 	}
 
 	public static DynamicDecryptBuilder sm4Cbc() {
-		return of(Spec.ALGORITHM_SM4, Spec.MODE_CBC, Spec.PADDING_PKCS7);
+		return sm4(Spec.MODE_CBC, Spec.PADDING_PKCS7);
 	}
 
 	public static DynamicDecryptBuilder sm4Cfb() {
-		return of(Spec.ALGORITHM_SM4, Spec.MODE_CFB, Spec.PADDING_NO_PADDING);
+		return sm4(Spec.MODE_CFB, Spec.PADDING_NO_PADDING);
 	}
 
 	public static DynamicDecryptBuilder sm4Ofb() {
-		return of(Spec.ALGORITHM_SM4, Spec.MODE_OFB, Spec.PADDING_NO_PADDING);
+		return sm4(Spec.MODE_OFB, Spec.PADDING_NO_PADDING);
 	}
 
 	public DynamicDecryptBuilder keyPool(KeyPool pool) {
@@ -78,28 +80,21 @@ public class DynamicDecryptBuilder {
 		return this;
 	}
 
-	public DynamicDecryptBuilder hashFunc(Function<byte[], byte[]> func) {
-		this.hashFunc = func;
+	public DynamicDecryptBuilder checksumCalculator(Function<byte[], byte[]> checksumCalculator) {
+		this.checksumCalculator = checksumCalculator;
 		return this;
 	}
 
 	public SimpleDynamicDecrypt simple() {
 
-		if (isEmpty(algorithmName)) {
-			throw new IllegalArgumentException("algorithmName must not be empty");
-		}
-		if (isEmpty(mode)) {
-			throw new IllegalArgumentException("mode must not be empty");
-		}
-		if (isEmpty(padding)) {
-			throw new IllegalArgumentException("padding must not be empty");
-		}
+		Validate.notEmpty(algorithmName, "algorithmName must not be empty");
+		Validate.notEmpty(mode, "mode must not be empty");
+		Validate.notEmpty(padding, "padding must not be empty");
+		Validate.notNull(keyPool, "keyPool must not be null");
+		Validate.notNull(checksumCalculator, "checksumCalculator must not be null");
 
-		if (keyPool == null) {
-			throw new IllegalArgumentException("key pool must not be null");
-		}
-		String transformation = BouncyCastleBlockCipher.transformation(algorithmName, mode, padding);
-		return new SimpleDynamicDecrypt(transformation, keyPool, ivPool == null ? Pools.empty() : ivPool, hashFunc);
+		return new SimpleDynamicDecrypt(algorithmName, mode, padding, keyPool, ivPool == null ? Pools.empty() : ivPool,
+				checksumCalculator);
 
 	}
 

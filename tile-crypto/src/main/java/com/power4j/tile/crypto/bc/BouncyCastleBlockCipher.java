@@ -17,13 +17,11 @@
 package com.power4j.tile.crypto.bc;
 
 import com.power4j.tile.crypto.core.BlockCipher;
-import com.power4j.tile.crypto.core.CipherEnvelope;
-import com.power4j.tile.crypto.core.CipherStore;
+import com.power4j.tile.crypto.core.CipherBlob;
+import com.power4j.tile.crypto.core.CipherBlobEnvelope;
 import com.power4j.tile.crypto.core.GeneralCryptoException;
 import com.power4j.tile.crypto.core.Verified;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.springframework.lang.Nullable;
+import com.power4j.tile.crypto.utils.CryptoUtil;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -47,33 +45,29 @@ public class BouncyCastleBlockCipher implements BlockCipher {
 
 	private final String[] transformationParts;
 
-	public BouncyCastleBlockCipher(String transformation, SecretKeySpec key, @Nullable IvParameterSpec iv) {
-		this(transformation, () -> key, () -> iv);
-	}
+	private final Function<byte[], byte[]> checksumCalculator;
 
-	public BouncyCastleBlockCipher(String transformation, byte[] key, @Nullable byte[] iv) {
-		this.transformation = transformation;
-		this.transformationParts = transformation.split("/");
-		this.keySupplier = () -> createKey(key, transformationParts[0]);
-		this.ivParameterSpecSupplier = () -> iv == null ? null : new IvParameterSpec(iv);
-	}
+	private final BiFunction<CipherBlob, byte[], Boolean> checksumVerifier;
 
 	public BouncyCastleBlockCipher(String transformation, Supplier<SecretKeySpec> keySupplier,
-			Supplier<IvParameterSpec> ivParameterSpecSupplier) {
+			Supplier<IvParameterSpec> ivParameterSpecSupplier, Function<byte[], byte[]> checksumCalculator,
+			BiFunction<CipherBlob, byte[], Boolean> checksumVerifier) {
 		this.transformation = transformation;
 		this.keySupplier = keySupplier;
 		this.ivParameterSpecSupplier = ivParameterSpecSupplier;
+		this.checksumCalculator = checksumCalculator;
+		this.checksumVerifier = checksumVerifier;
 		this.transformationParts = transformation.split("/");
 	}
 
 	@Override
-	public CipherEnvelope encryptEnvelope(byte[] data, Function<byte[], byte[]> hash) throws GeneralCryptoException {
+	public CipherBlobEnvelope encryptEnvelope(byte[] data) throws GeneralCryptoException {
 		final IvParameterSpec ivParameter = ivParameterSpecSupplier.get();
 		byte[] encrypted;
 		byte[] checksum;
 		try {
-			checksum = hash.apply(data);
-			Cipher cipher = createCipher(transformation);
+			checksum = checksumCalculator.apply(data);
+			Cipher cipher = CryptoUtil.createCipher(transformation);
 			cipher.init(Cipher.ENCRYPT_MODE, keySupplier.get(), ivParameter);
 			encrypted = cipher.doFinal(data);
 		}
@@ -81,7 +75,7 @@ public class BouncyCastleBlockCipher implements BlockCipher {
 			throw new GeneralCryptoException(e.getMessage(), e);
 		}
 		byte[] ivBytes = ivParameter == null ? null : ivParameter.getIV();
-		return CipherEnvelope.builder()
+		return CipherBlobEnvelope.builder()
 			.algorithm(transformationParts[0])
 			.mode(transformationParts[1])
 			.padding(transformationParts[2])
@@ -92,55 +86,21 @@ public class BouncyCastleBlockCipher implements BlockCipher {
 	}
 
 	@Override
-	public Verified<byte[]> decryptWithCheck(CipherStore store, BiFunction<CipherStore, byte[], Boolean> verifier)
-			throws GeneralCryptoException {
+	public Verified<byte[]> decrypt(CipherBlob store, boolean skipCheck) throws GeneralCryptoException {
 		byte[] decrypted;
 		try {
-			Cipher cipher = createCipher(transformation);
+			Cipher cipher = CryptoUtil.createCipher(transformation);
 			cipher.init(Cipher.DECRYPT_MODE, keySupplier.get(), ivParameterSpecSupplier.get());
 			decrypted = cipher.doFinal(store.getCipher());
 		}
 		catch (GeneralSecurityException e) {
-			return Verified.fail(null);
+			return Verified.fail(null, e);
 		}
-		if (verifier.apply(store, decrypted)) {
+		if (skipCheck) {
 			return Verified.pass(decrypted);
 		}
-		else {
-			return Verified.fail(decrypted);
-		}
+		return checksumVerifier.apply(store, decrypted) ? Verified.pass(decrypted) : Verified.fail(decrypted, null);
 
-	}
-
-	public static Cipher createCipher(String transformation) throws GeneralSecurityException {
-		return Cipher.getInstance(transformation, GlobalBouncyCastleProvider.INSTANCE.getProvider());
-	}
-
-	public static SecretKeySpec createKey(byte[] key, String algorithmName) {
-		return new SecretKeySpec(key, algorithmName);
-	}
-
-	public static String transformation(String algorithmName, String mode, String padding) {
-		return algorithmName + "/" + mode + "/" + padding;
-	}
-
-	protected static byte[] decodeHexKey(String hex) {
-		try {
-			return Hex.decodeHex(hex);
-		}
-		catch (DecoderException e) {
-			throw new IllegalArgumentException(String.format("Not hex encoded key:%s", hex));
-		}
-	}
-
-	protected static byte[] decodeHexIv(String iv) {
-
-		try {
-			return Hex.decodeHex(iv);
-		}
-		catch (DecoderException e) {
-			throw new IllegalArgumentException(String.format("Not hex encoded iv:%s", iv));
-		}
 	}
 
 }

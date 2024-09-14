@@ -14,40 +14,38 @@
  * limitations under the License.
  */
 
-package com.power4j.tile.crypto.core;
+package com.power4j.tile.crypto.utils;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.experimental.UtilityClass;
 import org.springframework.lang.Nullable;
-
-import java.util.Optional;
 
 /**
  * @author CJ (power4j@outlook.com)
- * @since 1.0
+ * @since 1.6
  */
-@Getter
-@Builder
-public class CipherEnvelope {
+@UtilityClass
+public class Validate {
 
-	private final String algorithm;
-
-	private final String padding;
-
-	private final String mode;
-
-	@Nullable
-	private final byte[] iv;
-
-	private final byte[] cipher;
-
-	private final byte[] checksum;
-
-	public Optional<byte[]> getIvOptional() {
-		if (iv == null || iv.length == 0) {
-			return Optional.empty();
+	public void notNull(@Nullable Object obj, @Nullable String errorMsg) {
+		if (obj == null) {
+			if (errorMsg == null) {
+				throw new IllegalArgumentException("Null is not allowed");
+			}
+			else {
+				throw new IllegalArgumentException(errorMsg);
+			}
 		}
-		return Optional.of(iv);
+	}
+
+	public void notEmpty(@Nullable String val, @Nullable String errorMsg) {
+		if (val == null || val.isEmpty()) {
+			if (errorMsg == null) {
+				throw new IllegalArgumentException("Empty value is not allowed.");
+			}
+			else {
+				throw new IllegalArgumentException(errorMsg);
+			}
+		}
 	}
 
 }

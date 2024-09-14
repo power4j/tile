@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.power4j.tile.crypto.bc;
+package com.power4j.tile.crypto.utils;
 
 import org.junit.jupiter.api.Test;
 

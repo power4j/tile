@@ -18,23 +18,18 @@ package com.power4j.tile.crypto.core;
 
 import com.power4j.tile.crypto.bc.BouncyCastleBlockCipher;
 import com.power4j.tile.crypto.bc.GlobalBouncyCastleProvider;
-import com.power4j.tile.crypto.bc.Sm3Util;
 import com.power4j.tile.crypto.bc.Spec;
 import com.power4j.tile.crypto.core.encode.Base64Encoder;
 import com.power4j.tile.crypto.core.encode.BufferEncoder;
 import com.power4j.tile.crypto.core.encode.HexEncoder;
 import com.power4j.tile.crypto.core.encode.UnicodeEncoder;
 import lombok.Builder;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
 import org.springframework.lang.Nullable;
 
 import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.GeneralSecurityException;
+import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author CJ (power4j@outlook.com)
@@ -44,30 +39,19 @@ public class TextCipherBuilder {
 
 	private static final Function<byte[], byte[]> HASH_NONE = b -> new byte[0];
 
-	private final String algorithmName;
-
-	private final String mode;
-
-	private final String padding;
+	private final BlockCipherBuilder blockCipherBuilder;
 
 	private BufferEncoder inputEncoder;
 
 	private BufferEncoder outputEncoder;
 
-	private Supplier<byte[]> keySupplier;
-
-	private Supplier<byte[]> ivSupplier = () -> null;
-
-	private Function<byte[], byte[]> hashFunction = HASH_NONE;
-
-	public TextCipherBuilder(String algorithmName, String mode, String padding) {
-		this.algorithmName = algorithmName;
-		this.mode = mode;
-		this.padding = padding;
+	public TextCipherBuilder(BlockCipherBuilder blockCipherBuilder) {
+		this.blockCipherBuilder = blockCipherBuilder;
 	}
 
 	public static TextCipherBuilder of(String algorithmName, String mode, String padding) {
-		return new TextCipherBuilder(algorithmName, mode, padding);
+		BlockCipherBuilder builder = BlockCipherBuilder.algorithm(algorithmName).mode(mode).padding(padding);
+		return new TextCipherBuilder(builder);
 	}
 
 	public static TextCipherBuilder sm4Ecb() {
@@ -84,6 +68,11 @@ public class TextCipherBuilder {
 
 	public static TextCipherBuilder sm4Ofb() {
 		return of(Spec.ALGORITHM_SM4, Spec.MODE_OFB, Spec.PADDING_NO_PADDING);
+	}
+
+	public TextCipherBuilder cipher(Consumer<BlockCipherBuilder> consumer) {
+		consumer.accept(blockCipherBuilder);
+		return this;
 	}
 
 	public TextCipherBuilder inputEncoding(BufferEncoding inputEncoding) {
@@ -106,99 +95,19 @@ public class TextCipherBuilder {
 		return this;
 	}
 
-	public TextCipherBuilder keySupplier(Supplier<byte[]> supplier) {
-		this.keySupplier = supplier;
-		return this;
-	}
-
-	public TextCipherBuilder key(byte[] key) {
-		return keySupplier(() -> key);
-	}
-
-	public TextCipherBuilder keyHex(String hex) {
-		this.keySupplier = () -> {
-			try {
-				return Hex.decodeHex(hex);
-			}
-			catch (DecoderException e) {
-				throw new IllegalArgumentException(String.format("Not hex encoded hex:%s", hex));
-			}
-		};
-		return this;
-	}
-
-	public TextCipherBuilder ivSupplier(Supplier<byte[]> supplier) {
-		this.ivSupplier = supplier;
-		return this;
-	}
-
-	public TextCipherBuilder iv(@Nullable byte[] iv) {
-		return ivSupplier(() -> iv);
-	}
-
-	public TextCipherBuilder ivHex(@Nullable String hex) {
-		if (null == hex) {
-			return iv(null);
-		}
-		try {
-			return iv(Hex.decodeHex(hex));
-		}
-		catch (DecoderException e) {
-			throw new IllegalArgumentException(String.format("Not hex encoded IV:%s", hex));
-		}
-	}
-
-	public TextCipherBuilder hashFunction(Function<byte[], byte[]> hashFunction) {
-		this.hashFunction = hashFunction;
-		return this;
-	}
-
-	public TextCipherBuilder hashSm3() {
-		this.hashFunction = (b) -> Sm3Util.hash(b, null);
-		return this;
-	}
-
 	public TextCipherBuilder reversedEncoder() {
-		return TextCipherBuilder.of(algorithmName, mode, padding)
-			.keySupplier(keySupplier)
-			.ivSupplier(ivSupplier)
-			.hashFunction(hashFunction)
-			.inputEncoding(outputEncoder)
-			.outputEncoding(inputEncoder);
+		return new TextCipherBuilder(blockCipherBuilder).inputEncoding(outputEncoder).outputEncoding(inputEncoder);
 	}
 
 	public TextCipher build() {
-
-		if (isEmpty(algorithmName)) {
-			throw new IllegalArgumentException("algorithmName must not be empty");
-		}
-		if (isEmpty(mode)) {
-			throw new IllegalArgumentException("mode must not be empty");
-		}
-		if (isEmpty(padding)) {
-			throw new IllegalArgumentException("padding must not be empty");
-		}
-		byte[] key = keySupplier.get();
-		if (isEmpty(key)) {
-			throw new IllegalArgumentException("key must not be empty");
-		}
-		byte[] iv = ivSupplier.get();
-		String transformation = BouncyCastleBlockCipher.transformation(algorithmName, mode, padding);
-		SecretKeySpec keySpec = BouncyCastleBlockCipher.createKey(key, algorithmName);
-		IvParameterSpec ivParameterSpec = isEmpty(iv) ? null : new IvParameterSpec(iv);
-		BouncyCastleBlockCipher cipher = new BouncyCastleBlockCipher(transformation, keySpec, ivParameterSpec);
+		BouncyCastleBlockCipher cipher = blockCipherBuilder.build();
 
 		return BouncyCastleTextCipher.builder()
 			.cipher(cipher)
 			.inputEncoder(inputEncoder)
 			.outputEncoder(outputEncoder)
-			.hashFunction(hashFunction)
 			.build();
 
-	}
-
-	protected static boolean isEmpty(@Nullable String val) {
-		return val == null || val.isEmpty();
 	}
 
 	protected static boolean isEmpty(@Nullable byte[] bytes) {
@@ -235,8 +144,6 @@ public class TextCipherBuilder {
 
 		private final BouncyCastleBlockCipher cipher;
 
-		private final Function<byte[], byte[]> hashFunction;
-
 		@Override
 		public String encrypt(String data) throws GeneralCryptoException {
 			return outputEncoder.encode(encryptData(inputEncoder.decode(data)));
@@ -244,7 +151,7 @@ public class TextCipherBuilder {
 
 		@Override
 		public CiphertextEnvelope encryptEnvelope(String data) throws GeneralCryptoException {
-			CipherEnvelope envelope = cipher.encryptEnvelope(inputEncoder.decode(data), hashFunction);
+			CipherBlobEnvelope envelope = cipher.encryptEnvelope(inputEncoder.decode(data));
 			String iv = envelope.getIvOptional().map(outputEncoder::encode).orElse(null);
 			return CiphertextEnvelope.builder()
 				.encoding(outputEncoder.algorithm())

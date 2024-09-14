@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.power4j.tile.crypto.bc;
+package com.power4j.tile.crypto.utils;
 
+import com.power4j.tile.crypto.bc.Spec;
 import com.power4j.tile.crypto.core.BlockCipher;
+import com.power4j.tile.crypto.core.BlockCipherBuilder;
 import com.power4j.tile.crypto.core.GeneralCryptoException;
-import org.springframework.lang.Nullable;
-
-import javax.crypto.spec.IvParameterSpec;
+import lombok.experimental.UtilityClass;
 
 /**
  * 安全建议<br>
@@ -33,83 +33,70 @@ import javax.crypto.spec.IvParameterSpec;
  * </ul>
  *
  * @author CJ (power4j@outlook.com)
- * @since 1.0
+ * @since 1.6
  */
-public class Sm4 extends BouncyCastleBlockCipher implements BlockCipher {
+@UtilityClass
+public class Sm4Util {
 
 	public static final int BLOCK_SIZE = 16;
 
-	private static final String ALGO_NAME = "SM4";
-
-	private static final String SM4_ECB = "SM4/ECB/PKCS7Padding";
-
-	private static final String SM4_CBC = "SM4/CBC/PKCS7Padding";
-
-	private static final String SM4_CFB = "SM4/CFB/NoPadding";
-
-	private static final String SM4_OFB = "SM4/OFB/NoPadding";
-
-	public Sm4(String transformation, byte[] key, @Nullable byte[] iv) {
-		super(transformation, createKey(key, ALGO_NAME), iv == null ? null : new IvParameterSpec(iv));
+	public BlockCipher useEcbWithPadding(byte[] key) throws GeneralCryptoException {
+		return builderWithVerifySupport(Spec.MODE_ECB, Spec.PADDING_PKCS7).secretKey(key).build();
 	}
 
-	public static Sm4 useEcbWithPadding(byte[] key) throws GeneralCryptoException {
-		return new Sm4(SM4_ECB, key, null);
-	}
-
-	public static Sm4 useCbcWithPadding(byte[] key, byte[] iv) throws GeneralCryptoException {
+	public BlockCipher useCbcWithPadding(byte[] key, byte[] iv) throws GeneralCryptoException {
 		if (iv.length != BLOCK_SIZE) {
 			throw new IllegalArgumentException(
 					String.format("Invalid IV length: %d, should be %d", iv.length, BLOCK_SIZE));
 		}
-		return new Sm4(SM4_CBC, key, iv);
+		return builderWithVerifySupport(Spec.MODE_CBC, Spec.PADDING_PKCS7).secretKey(key).ivParameter(iv).build();
 	}
 
-	public static Sm4 useCfb(byte[] key, byte[] iv) throws GeneralCryptoException {
+	public BlockCipher useCfb(byte[] key, byte[] iv) throws GeneralCryptoException {
 		if (iv.length != BLOCK_SIZE) {
 			throw new IllegalArgumentException(
 					String.format("Invalid IV length: %d, should be %d", iv.length, BLOCK_SIZE));
 		}
-		return new Sm4(SM4_CFB, key, iv);
+		return builderWithVerifySupport(Spec.MODE_CFB, Spec.PADDING_NO_PADDING).secretKey(key).ivParameter(iv).build();
 	}
 
-	public static Sm4 useOfb(byte[] key, byte[] iv) throws GeneralCryptoException {
+	public BlockCipher useOfb(byte[] key, byte[] iv) throws GeneralCryptoException {
 		if (iv.length != BLOCK_SIZE) {
 			throw new IllegalArgumentException(
 					String.format("Invalid IV length: %d, should be %d", iv.length, BLOCK_SIZE));
 		}
-		return new Sm4(SM4_OFB, key, iv);
+		return builderWithVerifySupport(Spec.MODE_OFB, Spec.PADDING_NO_PADDING).secretKey(key).ivParameter(iv).build();
 	}
 
-	public static Sm4 useEcbWithPadding(String hexKey) throws GeneralCryptoException {
-		byte[] key = decodeHexKey(hexKey);
+	public BlockCipher useEcbWithPadding(String hexKey) throws GeneralCryptoException {
+		byte[] key = CryptoUtil.decodeHex(hexKey, null);
 		return useEcbWithPadding(key);
 	}
 
-	public static Sm4 useCbcWithPadding(String hexKey, String hexIv) throws GeneralCryptoException {
-		byte[] key = decodeHexKey(hexKey);
-		byte[] iv = decodeHexIv(hexIv);
+	public BlockCipher useCbcWithPadding(String hexKey, String hexIv) throws GeneralCryptoException {
+		byte[] key = CryptoUtil.decodeHex(hexKey, null);
+		byte[] iv = CryptoUtil.decodeHex(hexIv, null);
 		return useCbcWithPadding(key, iv);
 	}
 
-	public static Sm4 useCfb(String hexKey, String hexIv) throws GeneralCryptoException {
-		byte[] key = decodeHexKey(hexKey);
-		byte[] iv = decodeHexIv(hexIv);
+	public BlockCipher useCfb(String hexKey, String hexIv) throws GeneralCryptoException {
+		byte[] key = CryptoUtil.decodeHex(hexKey, null);
+		byte[] iv = CryptoUtil.decodeHex(hexIv, null);
 		return useCfb(key, iv);
 	}
 
-	public static Sm4 useOfb(String hexKey, String hexIv) throws GeneralCryptoException {
-		byte[] key = decodeHexKey(hexKey);
-		byte[] iv = decodeHexIv(hexIv);
+	public BlockCipher useOfb(String hexKey, String hexIv) throws GeneralCryptoException {
+		byte[] key = CryptoUtil.decodeHex(hexKey, null);
+		byte[] iv = CryptoUtil.decodeHex(hexIv, null);
 		return useOfb(key, iv);
 	}
 
-	public String getAlgorithmName() {
-		return ALGO_NAME;
+	public BlockCipherBuilder builder(String mode, String padding) {
+		return BlockCipherBuilder.algorithm(Spec.ALGORITHM_SM4).mode(mode).padding(padding);
 	}
 
-	public int getBlockSize() {
-		return BLOCK_SIZE;
+	public BlockCipherBuilder builderWithVerifySupport(String mode, String padding) {
+		return builder(mode, padding).sm3ChecksumCalculator().sm3ChecksumVerifier();
 	}
 
 }

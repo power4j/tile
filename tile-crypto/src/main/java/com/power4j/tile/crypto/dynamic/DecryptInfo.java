@@ -14,29 +14,25 @@
  * limitations under the License.
  */
 
-package com.power4j.tile.crypto.wrapper;
+package com.power4j.tile.crypto.dynamic;
 
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.codec.binary.Hex;
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * @author CJ (power4j@outlook.com)
  * @since 1.0
  */
-@RequiredArgsConstructor
-public class HexEncoder implements OutputEncoder<String> {
+@Getter
+@Builder
+public class DecryptInfo {
 
-	private final boolean lowerCase;
+	private final boolean matched;
 
-	public static final HexEncoder LOWER = new HexEncoder(true);
+	private final long keyIndex;
 
-	public static final HexEncoder UPPER = new HexEncoder(false);
+	private final byte[] data;
 
-	public static final HexEncoder DEFAULT = LOWER;
-
-	@Override
-	public String encode(byte[] data) throws EncodeException {
-		return Hex.encodeHexString(data, lowerCase);
-	}
+	private final byte[] checksum;
 
 }

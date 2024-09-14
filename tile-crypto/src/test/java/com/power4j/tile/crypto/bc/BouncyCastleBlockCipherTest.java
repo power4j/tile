@@ -16,13 +16,13 @@
 
 package com.power4j.tile.crypto.bc;
 
-import com.power4j.tile.crypto.core.CipherEnvelope;
-import com.power4j.tile.crypto.core.CipherStore;
+import com.power4j.tile.crypto.core.CipherBlob;
+import com.power4j.tile.crypto.core.CipherBlobEnvelope;
 import com.power4j.tile.crypto.core.Verified;
+import com.power4j.tile.crypto.utils.Sm4Util;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import javax.crypto.spec.IvParameterSpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.function.Function;
@@ -42,9 +42,12 @@ class BouncyCastleBlockCipherTest {
 	@Test
 	void encrypt() {
 		byte[] plain = "hello".getBytes(StandardCharsets.UTF_8);
-		BouncyCastleBlockCipher cipher = new BouncyCastleBlockCipher("SM4/CBC/PKCS7Padding",
-				BouncyCastleBlockCipher.createKey(testKey, "SM4"), new IvParameterSpec(testIv));
-		CipherEnvelope envelope = cipher.encryptEnvelope(plain, (b) -> b);
+		BouncyCastleBlockCipher cipher = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
+			.secretKey(testKey)
+			.ivParameter(testIv)
+			.checksumCalculator(null)
+			.build();
+		CipherBlobEnvelope envelope = cipher.encryptEnvelope(plain);
 
 		Assertions.assertNotNull(envelope.getAlgorithm());
 		Assertions.assertNotNull(envelope.getMode());
@@ -61,13 +64,16 @@ class BouncyCastleBlockCipherTest {
 	void decryptWithCheck() {
 		byte[] plain = "hello".getBytes(StandardCharsets.UTF_8);
 		Function<byte[], byte[]> hashFunc = (b) -> Arrays.copyOf(b, 8);
-		BouncyCastleBlockCipher cipher = new BouncyCastleBlockCipher("SM4/CBC/PKCS7Padding",
-				BouncyCastleBlockCipher.createKey(testKey, "SM4"), new IvParameterSpec(testIv));
-		CipherEnvelope envelope = cipher.encryptEnvelope(plain, hashFunc);
 
-		CipherStore store = new CipherStore(envelope.getCipher(), envelope.getChecksum());
-		Verified<byte[]> verified = cipher.decryptWithCheck(store,
-				(s, d) -> Arrays.equals(s.getChecksum(), hashFunc.apply(d)));
+		BouncyCastleBlockCipher cipher = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
+			.secretKey(testKey)
+			.ivParameter(testIv)
+			.checksumCalculator(hashFunc)
+			.build();
+		CipherBlobEnvelope envelope = cipher.encryptEnvelope(plain);
+
+		CipherBlob store = new CipherBlob(envelope.getCipher(), envelope.getChecksum());
+		Verified<byte[]> verified = cipher.decrypt(store, false);
 		Assertions.assertTrue(verified.isPass());
 		Assertions.assertArrayEquals(plain, verified.getData());
 	}

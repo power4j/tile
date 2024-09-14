@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.power4j.tile.crypto.bc;
+package com.power4j.tile.crypto.utils;
 
+import com.power4j.tile.crypto.bc.GlobalBouncyCastleProvider;
+import com.power4j.tile.crypto.bc.Spec;
 import com.power4j.tile.crypto.core.GeneralCryptoException;
-import com.power4j.tile.crypto.wrapper.HexDecoder;
-import com.power4j.tile.crypto.wrapper.HexEncoder;
+import com.power4j.tile.crypto.core.encode.HexEncoder;
 import com.power4j.tile.crypto.wrapper.InputDecoder;
 import com.power4j.tile.crypto.wrapper.OutputEncoder;
 import lombok.experimental.UtilityClass;
@@ -93,7 +94,7 @@ public class Sm3Util {
 	 * @throws GeneralCryptoException 如果解码/编码异常
 	 */
 	public String hashHex(String input, int outputLen, @Nullable String salt) throws GeneralCryptoException {
-		return hash(HexDecoder.DEFAULT, HexEncoder.DEFAULT, input, outputLen, salt);
+		return hash(HexEncoder.DEFAULT::decode, HexEncoder.DEFAULT::encode, input, outputLen, salt);
 	}
 
 	/**
@@ -140,9 +141,9 @@ public class Sm3Util {
 	 * @throws GeneralCryptoException 如果解码/编码异常
 	 */
 	public boolean verifyHeadHex(String data, String hash, @Nullable String salt) throws GeneralCryptoException {
-		byte[] dataBytes = HexDecoder.DEFAULT.decode(data);
-		byte[] hashBytes = HexDecoder.DEFAULT.decode(hash);
-		byte[] saltBytes = salt == null ? null : HexDecoder.DEFAULT.decode(salt);
+		byte[] dataBytes = HexEncoder.DEFAULT.decode(data);
+		byte[] hashBytes = HexEncoder.DEFAULT.decode(hash);
+		byte[] saltBytes = salt == null ? null : HexEncoder.DEFAULT.decode(salt);
 		return verifyHead(dataBytes, hashBytes, saltBytes);
 	}
 
@@ -155,9 +156,9 @@ public class Sm3Util {
 	 * @throws GeneralCryptoException 如果解码/编码异常
 	 */
 	public boolean verifyHex(String data, String hash, @Nullable String salt) throws GeneralCryptoException {
-		byte[] dataBytes = HexDecoder.DEFAULT.decode(data);
-		byte[] hashBytes = HexDecoder.DEFAULT.decode(hash);
-		byte[] saltBytes = salt == null ? null : HexDecoder.DEFAULT.decode(salt);
+		byte[] dataBytes = HexEncoder.DEFAULT.decode(data);
+		byte[] hashBytes = HexEncoder.DEFAULT.decode(hash);
+		byte[] saltBytes = salt == null ? null : HexEncoder.DEFAULT.decode(salt);
 		return verify(dataBytes, hashBytes, saltBytes);
 	}
 

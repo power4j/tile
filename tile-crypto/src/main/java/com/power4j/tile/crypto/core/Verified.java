@@ -35,12 +35,15 @@ public class Verified<T> {
 	@Nullable
 	private final T data;
 
+	@Nullable
+	private final Throwable cause;
+
 	public static <T> Verified<T> pass(T data) {
-		return new Verified<>(true, Objects.requireNonNull(data));
+		return new Verified<>(true, Objects.requireNonNull(data), null);
 	}
 
-	public static <T> Verified<T> fail(@Nullable T data) {
-		return new Verified<>(false, data);
+	public static <T> Verified<T> fail(@Nullable T data, @Nullable Throwable cause) {
+		return new Verified<>(false, data, cause);
 	}
 
 }

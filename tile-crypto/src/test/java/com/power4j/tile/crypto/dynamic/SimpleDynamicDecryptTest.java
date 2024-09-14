@@ -16,10 +16,11 @@
 
 package com.power4j.tile.crypto.dynamic;
 
-import com.power4j.tile.crypto.bc.Sm4;
-import com.power4j.tile.crypto.core.CipherEnvelope;
-import com.power4j.tile.crypto.core.CipherStore;
-import com.power4j.tile.crypto.core.Verified;
+import com.power4j.tile.crypto.bc.Spec;
+import com.power4j.tile.crypto.core.BlockCipher;
+import com.power4j.tile.crypto.core.CipherBlob;
+import com.power4j.tile.crypto.core.CipherBlobEnvelope;
+import com.power4j.tile.crypto.utils.Sm4Util;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -45,25 +46,30 @@ class SimpleDynamicDecryptTest {
 	private final byte[] testIv = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C,
 			0x0D, 0x0E, 0x0F, 0x10 };
 
-	private final Function<byte[], byte[]> hashFunc = (b) -> Arrays.copyOf(b, 8);
+	private final Function<byte[], byte[]> checksumCalculator = (b) -> Arrays.copyOf(b, 8);
 
 	@Test
 	void decrypt() {
 		byte[] plain = "hello".getBytes(StandardCharsets.UTF_8);
 		KeyPool pool = Pools.rotation(testKey1, testKey2, testKey3);
 		SimpleDynamicDecrypt dec = DynamicDecryptBuilder.sm4Cbc()
-			.hashFunc(hashFunc)
+			.checksumCalculator(checksumCalculator)
 			.keyPool(pool)
 			.ivPool(Pools.fixed(testIv))
 			.simple();
 
-		Sm4 enc = Sm4.useCbcWithPadding(testKey3, testIv);
-		CipherEnvelope envelope = enc.encryptEnvelope(plain, hashFunc);
-		CipherStore store = new CipherStore(envelope.getCipher(), envelope.getChecksum());
-		Verified<byte[]> verified = dec.decrypt(store);
+		BlockCipher enc = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
+			.secretKey(testKey3)
+			.ivParameter(testIv)
+			.checksumCalculator(checksumCalculator)
+			.build();
+		CipherBlobEnvelope envelope = enc.encryptEnvelope(plain);
+		CipherBlob store = new CipherBlob(envelope.getCipher(), envelope.getChecksum());
+		DynamicDecryptResult result = dec.decrypt(store);
 
-		Assertions.assertTrue(verified.isPass());
-		Assertions.assertArrayEquals(plain, verified.getData());
+		Assertions.assertTrue(result.success());
+		Assertions.assertEquals(3, result.getTried().size());
+		Assertions.assertArrayEquals(plain, result.requiredMatched().getData());
 	}
 
 }

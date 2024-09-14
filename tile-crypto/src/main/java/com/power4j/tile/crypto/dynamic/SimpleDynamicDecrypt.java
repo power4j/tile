@@ -16,65 +16,88 @@
 
 package com.power4j.tile.crypto.dynamic;
 
-import com.power4j.tile.crypto.bc.BouncyCastleBlockCipher;
-import com.power4j.tile.crypto.core.CipherStore;
+import com.power4j.tile.crypto.core.BlockCipher;
+import com.power4j.tile.crypto.core.BlockCipherBuilder;
+import com.power4j.tile.crypto.core.CipherBlob;
 import com.power4j.tile.crypto.core.GeneralCryptoException;
 import com.power4j.tile.crypto.core.Verified;
-import lombok.Builder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
 /**
  * @author CJ (power4j@outlook.com)
- * @since 1.0
+ * @since 1.6
+ * @see DynamicDecryptBuilder
  */
-@Builder
+@RequiredArgsConstructor
 public class SimpleDynamicDecrypt implements DynamicDecrypt {
 
-	private final String transformation;
+	private final String algorithmName;
+
+	private final String mode;
+
+	private final String padding;
 
 	private final KeyPool keyPool;
 
 	private final KeyPool ivPool;
 
-	private final Function<byte[], byte[]> hashFunc;
+	private final Function<byte[], byte[]> checksumCalculator;
 
 	@Override
-	public Verified<byte[]> decrypt(CipherStore store) {
+	public DynamicDecryptResult decrypt(CipherBlob store) {
 		final long timestamp = System.currentTimeMillis();
 		List<DynamicKey> keyList = keyPool.decryptKeys(timestamp);
 		List<DynamicKey> ivList = ivPool.decryptKeys(timestamp);
 		if (keyList.isEmpty()) {
 			throw new GeneralCryptoException("No key found");
 		}
-		Verified<byte[]> result;
+		List<DecryptInfo> tried = new ArrayList<>(keyList.size() + ivList.size());
+		DecryptInfo result;
 		for (DynamicKey key : keyList) {
 			if (ivList.isEmpty()) {
 				result = tryOne(store, key, null);
-				if (result.isPass()) {
-					return result;
+				tried.add(result);
+				if (result.isMatched()) {
+					return DynamicDecryptResult.success(result, tried);
 				}
 			}
 			else {
 				for (DynamicKey iv : ivList) {
 					result = tryOne(store, key, iv);
-					if (result.isPass()) {
-						return result;
+					tried.add(result);
+					if (result.isMatched()) {
+						return DynamicDecryptResult.success(result, tried);
 					}
 				}
 			}
 		}
-		return Verified.fail(null);
+		return DynamicDecryptResult.fail(tried);
 	}
 
-	protected Verified<byte[]> tryOne(CipherStore store, DynamicKey key, @Nullable DynamicKey iv) {
+	protected DecryptInfo tryOne(CipherBlob store, DynamicKey key, @Nullable DynamicKey iv) {
 		try {
-			BouncyCastleBlockCipher cipher = new BouncyCastleBlockCipher(transformation, key.getKey(),
-					iv == null ? null : iv.getKey());
-			return cipher.decryptWithCheck(store, this::verify);
+			BlockCipher cipher = BlockCipherBuilder.algorithm(algorithmName)
+				.mode(mode)
+				.padding(padding)
+				.secretKey(key.getKey())
+				.ivParameter(iv == null ? null : iv.getKey())
+				.checksumCalculator(checksumCalculator)
+				.checksumVerifier(
+						(cipherBlob, bytes) -> Arrays.equals(cipherBlob.getChecksum(), checksumCalculator.apply(bytes)))
+				.build();
+			Verified<byte[]> verified = cipher.decrypt(store, false);
+			return DecryptInfo.builder()
+				.matched(verified.isPass())
+				.keyIndex(key.getIndex())
+				.checksum(store.getChecksum())
+				.data(verified.getData())
+				.build();
 		}
 		catch (GeneralCryptoException e) {
 			throw e;
@@ -82,10 +105,6 @@ public class SimpleDynamicDecrypt implements DynamicDecrypt {
 		catch (Exception e) {
 			throw new GeneralCryptoException(e.getMessage(), e);
 		}
-	}
-
-	protected boolean verify(CipherStore store, byte[] plain) {
-		return Arrays.equals(store.getChecksum(), hashFunc.apply(plain));
 	}
 
 }

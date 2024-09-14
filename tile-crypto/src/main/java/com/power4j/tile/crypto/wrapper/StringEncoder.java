@@ -16,7 +16,7 @@
 
 package com.power4j.tile.crypto.wrapper;
 
-import lombok.RequiredArgsConstructor;
+import com.power4j.tile.crypto.core.encode.UnicodeEncoder;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -25,10 +25,9 @@ import java.nio.charset.StandardCharsets;
  * @author CJ (power4j@outlook.com)
  * @since 1.0
  */
-@RequiredArgsConstructor
 public class StringEncoder implements OutputEncoder<String> {
 
-	private final Charset charset;
+	private final OutputEncoderAdapter adapter;
 
 	public static final StringEncoder DEFAULT = new StringEncoder(Charset.defaultCharset());
 
@@ -36,9 +35,28 @@ public class StringEncoder implements OutputEncoder<String> {
 
 	public static final StringEncoder ISO_8859_1 = new StringEncoder(StandardCharsets.ISO_8859_1);
 
+	public StringEncoder(Charset charset) {
+		this.adapter = new OutputEncoderAdapter(charset);
+	}
+
 	@Override
 	public String encode(byte[] data) throws EncodeException {
-		return new String(data, charset);
+		return adapter.encode(data);
+	}
+
+	static class OutputEncoderAdapter implements OutputEncoder<String> {
+
+		private final UnicodeEncoder encoder;
+
+		OutputEncoderAdapter(Charset charset) {
+			this.encoder = new UnicodeEncoder(charset);
+		}
+
+		@Override
+		public String encode(byte[] data) throws EncodeException {
+			return encoder.encode(data);
+		}
+
 	}
 
 }

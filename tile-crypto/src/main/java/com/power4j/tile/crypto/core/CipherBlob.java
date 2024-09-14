@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-public class CipherStore {
+public class CipherBlob {
 
 	private final byte[] cipher;
 

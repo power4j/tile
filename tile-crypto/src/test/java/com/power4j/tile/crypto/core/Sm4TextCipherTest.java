@@ -39,7 +39,7 @@ class Sm4TextCipherTest {
 
 	@Test
 	void sm4EcbUnicodeTest() {
-		TextCipherBuilder builder = TextCipherBuilder.sm4Ecb().keyHex(key);
+		TextCipherBuilder builder = TextCipherBuilder.sm4Ecb().cipher(c -> c.secretKeyHex(key));
 		for (BufferEncoding inputEncoding : unicodeEncodings) {
 			for (BufferEncoding outputEncoding : binaryEncodings) {
 				String hint = String.format("sm4Ecb encrypt:%s -> %s,decrypt:%s -> %s", inputEncoding, outputEncoding,
@@ -55,7 +55,7 @@ class Sm4TextCipherTest {
 
 	@Test
 	void sm4CbcUnicodeTest() {
-		TextCipherBuilder builder = TextCipherBuilder.sm4Cbc().keyHex(key).ivHex(iv);
+		TextCipherBuilder builder = TextCipherBuilder.sm4Cbc().cipher(c -> c.secretKeyHex(key).ivParameterHex(iv));
 		for (BufferEncoding inputEncoding : unicodeEncodings) {
 			for (BufferEncoding outputEncoding : binaryEncodings) {
 				String hint = String.format("sm4Cbc encrypt:%s -> %s,decrypt:%s -> %s", inputEncoding, outputEncoding,
@@ -71,7 +71,7 @@ class Sm4TextCipherTest {
 
 	@Test
 	void sm4CfbUnicodeTest() {
-		TextCipherBuilder builder = TextCipherBuilder.sm4Cfb().keyHex(key).ivHex(iv);
+		TextCipherBuilder builder = TextCipherBuilder.sm4Cfb().cipher(c -> c.secretKeyHex(key).ivParameterHex(iv));
 		for (BufferEncoding inputEncoding : unicodeEncodings) {
 			for (BufferEncoding outputEncoding : binaryEncodings) {
 				String hint = String.format("sm4Cfb encrypt:%s -> %s,decrypt:%s -> %s", inputEncoding, outputEncoding,
@@ -87,7 +87,7 @@ class Sm4TextCipherTest {
 
 	@Test
 	void sm4OfbUnicodeTest() {
-		TextCipherBuilder builder = TextCipherBuilder.sm4Ofb().keyHex(key).ivHex(iv);
+		TextCipherBuilder builder = TextCipherBuilder.sm4Ofb().cipher(c -> c.secretKeyHex(key).ivParameterHex(iv));
 		for (BufferEncoding inputEncoding : unicodeEncodings) {
 			for (BufferEncoding outputEncoding : binaryEncodings) {
 				String hint = String.format("sm4Ofb encrypt:%s -> %s,decrypt:%s -> %s", inputEncoding, outputEncoding,
@@ -106,11 +106,9 @@ class Sm4TextCipherTest {
 
 		String plain = "hello";
 		TextCipherBuilder builder = TextCipherBuilder.sm4Cbc()
-			.keyHex(key)
-			.ivHex(iv)
+			.cipher(c -> c.secretKeyHex(key).ivParameterHex(iv).sm3ChecksumCalculator())
 			.inputEncoding(BufferEncoding.UTF_8)
-			.outputEncoding(BufferEncoding.HEX)
-			.hashSm3();
+			.outputEncoding(BufferEncoding.HEX);
 		CiphertextEnvelope envelope = builder.build().encryptEnvelope(plain);
 		System.out.println("encrypted envelope = " + envelope);
 		Assertions.assertNotNull(envelope.getEncoding());
