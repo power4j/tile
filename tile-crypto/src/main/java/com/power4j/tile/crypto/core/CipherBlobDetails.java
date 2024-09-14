@@ -28,9 +28,7 @@ import java.util.Optional;
  */
 @Getter
 @Builder
-public class CiphertextEnvelope {
-
-	private final String encoding;
+public class CipherBlobDetails {
 
 	private final String algorithm;
 
@@ -39,27 +37,17 @@ public class CiphertextEnvelope {
 	private final String mode;
 
 	@Nullable
-	private final String iv;
+	private final byte[] iv;
 
-	private final String ciphertext;
+	private final byte[] cipher;
 
-	private final String checksum;
+	private final byte[] checksum;
 
-	public Optional<String> getIvOptional(boolean trimToNull) {
-		if (iv == null) {
-			return Optional.empty();
-		}
-		if (trimToNull && iv.trim().isEmpty()) {
+	public Optional<byte[]> getIvOptional() {
+		if (iv == null || iv.length == 0) {
 			return Optional.empty();
 		}
 		return Optional.of(iv);
-	}
-
-	@Override
-	public String toString() {
-		return "CiphertextEnvelope{" + "encoding='" + encoding + '\'' + ", algorithm='" + algorithm + '\''
-				+ ", padding='" + padding + '\'' + ", mode='" + mode + '\'' + ", iv='" + iv + '\'' + ", ciphertext='"
-				+ ciphertext + '\'' + ", checksum='" + checksum + '\'' + '}';
 	}
 
 }

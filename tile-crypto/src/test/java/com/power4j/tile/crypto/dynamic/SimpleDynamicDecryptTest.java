@@ -17,9 +17,9 @@
 package com.power4j.tile.crypto.dynamic;
 
 import com.power4j.tile.crypto.bc.Spec;
-import com.power4j.tile.crypto.core.BlockCipher;
-import com.power4j.tile.crypto.core.CipherBlob;
-import com.power4j.tile.crypto.core.CipherBlobEnvelope;
+import com.power4j.tile.crypto.core.CipherBlobDetails;
+import com.power4j.tile.crypto.core.QuickCipher;
+import com.power4j.tile.crypto.core.UncheckedCipher;
 import com.power4j.tile.crypto.utils.Sm4Util;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -58,18 +58,18 @@ class SimpleDynamicDecryptTest {
 			.ivPool(Pools.fixed(testIv))
 			.simple();
 
-		BlockCipher enc = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
+		QuickCipher enc = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
 			.secretKey(testKey3)
 			.ivParameter(testIv)
 			.checksumCalculator(checksumCalculator)
 			.build();
-		CipherBlobEnvelope envelope = enc.encryptEnvelope(plain);
-		CipherBlob store = new CipherBlob(envelope.getCipher(), envelope.getChecksum());
+		CipherBlobDetails details = enc.encrypt(plain);
+		UncheckedCipher store = UncheckedCipher.of(details.getCipher(), details.getChecksum());
 		DynamicDecryptResult result = dec.decrypt(store);
 
 		Assertions.assertTrue(result.success());
 		Assertions.assertEquals(3, result.getTried().size());
-		Assertions.assertArrayEquals(plain, result.requiredMatched().getData());
+		Assertions.assertTrue(result.requiredMatched().getData().dataEquals(plain));
 	}
 
 	@Test
@@ -89,25 +89,25 @@ class SimpleDynamicDecryptTest {
 			.keyPool(pool)
 			.ivPool(Pools.fixed(testIv));
 
-		BlockCipher enc = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
-			.secretKey(testKey3)
+		QuickCipher enc = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
+			.secretKey(pool.one(time).getKey())
 			.ivParameter(testIv)
 			.checksumCalculator(checksumCalculator)
 			.build();
-		CipherBlobEnvelope envelope = enc.encryptEnvelope(plain);
-		CipherBlob store = new CipherBlob(envelope.getCipher(), envelope.getChecksum());
+		CipherBlobDetails details = enc.encrypt(plain);
+		UncheckedCipher store = UncheckedCipher.of(details.getCipher(), details.getChecksum());
 
 		DynamicDecryptResult result = builder.parameterSupplier(() -> time).simple().decrypt(store);
 		Assertions.assertTrue(result.success());
-		Assertions.assertArrayEquals(plain, result.requiredMatched().getData());
+		Assertions.assertTrue(result.requiredMatched().getData().dataEquals(plain));
 
 		result = builder.parameterSupplier(() -> time + intervalSeconds * 1000 * windowSize).simple().decrypt(store);
 		Assertions.assertTrue(result.success());
-		Assertions.assertArrayEquals(plain, result.requiredMatched().getData());
+		Assertions.assertTrue(result.requiredMatched().getData().dataEquals(plain));
 
 		result = builder.parameterSupplier(() -> time - intervalSeconds * 1000 * windowSize).simple().decrypt(store);
 		Assertions.assertTrue(result.success());
-		Assertions.assertArrayEquals(plain, result.requiredMatched().getData());
+		Assertions.assertTrue(result.requiredMatched().getData().dataEquals(plain));
 	}
 
 }

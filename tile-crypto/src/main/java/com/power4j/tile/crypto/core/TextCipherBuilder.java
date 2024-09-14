@@ -16,7 +16,7 @@
 
 package com.power4j.tile.crypto.core;
 
-import com.power4j.tile.crypto.bc.BouncyCastleBlockCipher;
+import com.power4j.tile.crypto.bc.BouncyCastleQuickCipher;
 import com.power4j.tile.crypto.bc.GlobalBouncyCastleProvider;
 import com.power4j.tile.crypto.bc.Spec;
 import com.power4j.tile.crypto.core.encode.Base64Encoder;
@@ -39,18 +39,18 @@ public class TextCipherBuilder {
 
 	private static final Function<byte[], byte[]> HASH_NONE = b -> new byte[0];
 
-	private final BlockCipherBuilder blockCipherBuilder;
+	private final QuickCipherBuilder quickCipherBuilder;
 
 	private BufferEncoder inputEncoder;
 
 	private BufferEncoder outputEncoder;
 
-	public TextCipherBuilder(BlockCipherBuilder blockCipherBuilder) {
-		this.blockCipherBuilder = blockCipherBuilder;
+	public TextCipherBuilder(QuickCipherBuilder quickCipherBuilder) {
+		this.quickCipherBuilder = quickCipherBuilder;
 	}
 
 	public static TextCipherBuilder of(String algorithmName, String mode, String padding) {
-		BlockCipherBuilder builder = BlockCipherBuilder.algorithm(algorithmName).mode(mode).padding(padding);
+		QuickCipherBuilder builder = QuickCipherBuilder.algorithm(algorithmName).mode(mode).padding(padding);
 		return new TextCipherBuilder(builder);
 	}
 
@@ -70,8 +70,8 @@ public class TextCipherBuilder {
 		return of(Spec.ALGORITHM_SM4, Spec.MODE_OFB, Spec.PADDING_NO_PADDING);
 	}
 
-	public TextCipherBuilder cipher(Consumer<BlockCipherBuilder> consumer) {
-		consumer.accept(blockCipherBuilder);
+	public TextCipherBuilder cipher(Consumer<QuickCipherBuilder> consumer) {
+		consumer.accept(quickCipherBuilder);
 		return this;
 	}
 
@@ -96,11 +96,11 @@ public class TextCipherBuilder {
 	}
 
 	public TextCipherBuilder reversedEncoder() {
-		return new TextCipherBuilder(blockCipherBuilder).inputEncoding(outputEncoder).outputEncoding(inputEncoder);
+		return new TextCipherBuilder(quickCipherBuilder).inputEncoding(outputEncoder).outputEncoding(inputEncoder);
 	}
 
 	public TextCipher build() {
-		BouncyCastleBlockCipher cipher = blockCipherBuilder.build();
+		BouncyCastleQuickCipher cipher = quickCipherBuilder.build();
 
 		return BouncyCastleTextCipher.builder()
 			.cipher(cipher)
@@ -142,7 +142,7 @@ public class TextCipherBuilder {
 
 		private final BufferEncoder outputEncoder;
 
-		private final BouncyCastleBlockCipher cipher;
+		private final BouncyCastleQuickCipher cipher;
 
 		@Override
 		public String encrypt(String data) throws GeneralCryptoException {
@@ -150,17 +150,17 @@ public class TextCipherBuilder {
 		}
 
 		@Override
-		public CiphertextEnvelope encryptEnvelope(String data) throws GeneralCryptoException {
-			CipherBlobEnvelope envelope = cipher.encryptEnvelope(inputEncoder.decode(data));
-			String iv = envelope.getIvOptional().map(outputEncoder::encode).orElse(null);
-			return CiphertextEnvelope.builder()
+		public CiphertextDetails encryptEnvelope(String data) throws GeneralCryptoException {
+			CipherBlobDetails details = cipher.encrypt(inputEncoder.decode(data));
+			String iv = details.getIvOptional().map(outputEncoder::encode).orElse(null);
+			return CiphertextDetails.builder()
 				.encoding(outputEncoder.algorithm())
-				.algorithm(envelope.getAlgorithm())
-				.mode(envelope.getMode())
-				.padding(envelope.getPadding())
-				.ciphertext(outputEncoder.encode(envelope.getCipher()))
+				.algorithm(details.getAlgorithm())
+				.mode(details.getMode())
+				.padding(details.getPadding())
+				.ciphertext(outputEncoder.encode(details.getCipher()))
 				.iv(iv)
-				.checksum(outputEncoder.encode(envelope.getChecksum()))
+				.checksum(outputEncoder.encode(details.getChecksum()))
 				.build();
 		}
 
@@ -170,7 +170,7 @@ public class TextCipherBuilder {
 		}
 
 		private byte[] encryptData(byte[] data) throws GeneralCryptoException {
-			return cipher.encrypt(data);
+			return cipher.encrypt(data).getCipher();
 		}
 
 		private byte[] decryptData(byte[] data) throws GeneralCryptoException {

@@ -17,9 +17,9 @@
 package com.power4j.tile.crypto.utils;
 
 import com.power4j.tile.crypto.bc.Spec;
-import com.power4j.tile.crypto.core.BlockCipher;
-import com.power4j.tile.crypto.core.BlockCipherBuilder;
 import com.power4j.tile.crypto.core.GeneralCryptoException;
+import com.power4j.tile.crypto.core.QuickCipher;
+import com.power4j.tile.crypto.core.QuickCipherBuilder;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -40,11 +40,11 @@ public class Sm4Util {
 
 	public static final int BLOCK_SIZE = 16;
 
-	public BlockCipher useEcbWithPadding(byte[] key) throws GeneralCryptoException {
+	public QuickCipher useEcbWithPadding(byte[] key) throws GeneralCryptoException {
 		return builderWithVerifySupport(Spec.MODE_ECB, Spec.PADDING_PKCS7).secretKey(key).build();
 	}
 
-	public BlockCipher useCbcWithPadding(byte[] key, byte[] iv) throws GeneralCryptoException {
+	public QuickCipher useCbcWithPadding(byte[] key, byte[] iv) throws GeneralCryptoException {
 		if (iv.length != BLOCK_SIZE) {
 			throw new IllegalArgumentException(
 					String.format("Invalid IV length: %d, should be %d", iv.length, BLOCK_SIZE));
@@ -52,7 +52,7 @@ public class Sm4Util {
 		return builderWithVerifySupport(Spec.MODE_CBC, Spec.PADDING_PKCS7).secretKey(key).ivParameter(iv).build();
 	}
 
-	public BlockCipher useCfb(byte[] key, byte[] iv) throws GeneralCryptoException {
+	public QuickCipher useCfb(byte[] key, byte[] iv) throws GeneralCryptoException {
 		if (iv.length != BLOCK_SIZE) {
 			throw new IllegalArgumentException(
 					String.format("Invalid IV length: %d, should be %d", iv.length, BLOCK_SIZE));
@@ -60,7 +60,7 @@ public class Sm4Util {
 		return builderWithVerifySupport(Spec.MODE_CFB, Spec.PADDING_NO_PADDING).secretKey(key).ivParameter(iv).build();
 	}
 
-	public BlockCipher useOfb(byte[] key, byte[] iv) throws GeneralCryptoException {
+	public QuickCipher useOfb(byte[] key, byte[] iv) throws GeneralCryptoException {
 		if (iv.length != BLOCK_SIZE) {
 			throw new IllegalArgumentException(
 					String.format("Invalid IV length: %d, should be %d", iv.length, BLOCK_SIZE));
@@ -68,34 +68,34 @@ public class Sm4Util {
 		return builderWithVerifySupport(Spec.MODE_OFB, Spec.PADDING_NO_PADDING).secretKey(key).ivParameter(iv).build();
 	}
 
-	public BlockCipher useEcbWithPadding(String hexKey) throws GeneralCryptoException {
+	public QuickCipher useEcbWithPadding(String hexKey) throws GeneralCryptoException {
 		byte[] key = CryptoUtil.decodeHex(hexKey, null);
 		return useEcbWithPadding(key);
 	}
 
-	public BlockCipher useCbcWithPadding(String hexKey, String hexIv) throws GeneralCryptoException {
+	public QuickCipher useCbcWithPadding(String hexKey, String hexIv) throws GeneralCryptoException {
 		byte[] key = CryptoUtil.decodeHex(hexKey, null);
 		byte[] iv = CryptoUtil.decodeHex(hexIv, null);
 		return useCbcWithPadding(key, iv);
 	}
 
-	public BlockCipher useCfb(String hexKey, String hexIv) throws GeneralCryptoException {
+	public QuickCipher useCfb(String hexKey, String hexIv) throws GeneralCryptoException {
 		byte[] key = CryptoUtil.decodeHex(hexKey, null);
 		byte[] iv = CryptoUtil.decodeHex(hexIv, null);
 		return useCfb(key, iv);
 	}
 
-	public BlockCipher useOfb(String hexKey, String hexIv) throws GeneralCryptoException {
+	public QuickCipher useOfb(String hexKey, String hexIv) throws GeneralCryptoException {
 		byte[] key = CryptoUtil.decodeHex(hexKey, null);
 		byte[] iv = CryptoUtil.decodeHex(hexIv, null);
 		return useOfb(key, iv);
 	}
 
-	public BlockCipherBuilder builder(String mode, String padding) {
-		return BlockCipherBuilder.algorithm(Spec.ALGORITHM_SM4).mode(mode).padding(padding);
+	public QuickCipherBuilder builder(String mode, String padding) {
+		return QuickCipherBuilder.algorithm(Spec.ALGORITHM_SM4).mode(mode).padding(padding);
 	}
 
-	public BlockCipherBuilder builderWithVerifySupport(String mode, String padding) {
+	public QuickCipherBuilder builderWithVerifySupport(String mode, String padding) {
 		return builder(mode, padding).sm3ChecksumCalculator().sm3ChecksumVerifier();
 	}
 

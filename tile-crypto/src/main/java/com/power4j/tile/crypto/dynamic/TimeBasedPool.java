@@ -22,7 +22,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author CJ (power4j@outlook.com)
@@ -56,12 +55,12 @@ public class TimeBasedPool implements KeyPool {
 	}
 
 	@Override
-	public Optional<DynamicKey> encryptKey(long param) {
-		return Optional.of(atOffset(param, 0));
+	public DynamicKey one(long param) {
+		return atOffset(param, 0);
 	}
 
 	@Override
-	public List<DynamicKey> decryptKeys(long param) {
+	public List<DynamicKey> some(long param) {
 		List<DynamicKey> keys = new ArrayList<>(windowSize * 2 + 1);
 		keys.add(atOffset(param, 0));
 		for (int i = 1; i <= windowSize; i++) {

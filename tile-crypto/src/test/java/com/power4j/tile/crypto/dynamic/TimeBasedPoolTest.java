@@ -73,9 +73,9 @@ class TimeBasedPoolTest {
 			.interval(Duration.ofMinutes(1))
 			.fillBytes(new byte[] { 1 })
 			.build();
-		final List<DynamicKey> decryptKeys = pool.decryptKeys(input);
+		final List<DynamicKey> decryptKeys = pool.some(input);
 		Assertions.assertEquals(11, decryptKeys.size());
-		final DynamicKey encryptKey = pool.encryptKey(input).orElse(null);
+		final DynamicKey encryptKey = pool.one(input);
 		Assertions.assertNotNull(encryptKey);
 		Assertions.assertArrayEquals(encryptKey.getKey(), decryptKeys.get(0).getKey());
 	}

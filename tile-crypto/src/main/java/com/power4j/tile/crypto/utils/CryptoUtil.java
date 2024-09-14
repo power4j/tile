@@ -17,16 +17,16 @@
 package com.power4j.tile.crypto.utils;
 
 import com.power4j.tile.crypto.bc.GlobalBouncyCastleProvider;
-import com.power4j.tile.crypto.core.CipherBlob;
 import com.power4j.tile.crypto.core.GeneralCryptoException;
+import com.power4j.tile.crypto.core.UncheckedCipher;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.lang.Nullable;
 
 import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
+import java.security.NoSuchAlgorithmException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -39,15 +39,20 @@ public class CryptoUtil {
 
 	public static final Function<byte[], byte[]> SM3_CHECKSUM_CALCULATOR = (b) -> Sm3Util.hash(b, null);
 
-	public static final BiFunction<CipherBlob, byte[], Boolean> SM3_CHECKSUM_VERIFIER = (cipherBlob, b) -> Arrays
-		.equals(SM3_CHECKSUM_CALCULATOR.apply(b), cipherBlob.getChecksum());
+	public static final BiFunction<UncheckedCipher, byte[], Boolean> SM3_CHECKSUM_VERIFIER = (input,
+			b) -> input.getChecksum().dataEquals(SM3_CHECKSUM_CALCULATOR.apply(b));
 
-	public static final BiFunction<CipherBlob, byte[], Boolean> IGNORED_CHECKSUM_VERIFIER = (blob, bytes) -> true;
+	public static final BiFunction<UncheckedCipher, byte[], Boolean> IGNORED_CHECKSUM_VERIFIER = (blob, bytes) -> true;
 
 	public static final Function<byte[], byte[]> EMPTY_CHECKSUM_CALCULATOR = b -> new byte[0];
 
-	public Cipher createCipher(String transformation) throws GeneralSecurityException {
-		return Cipher.getInstance(transformation, GlobalBouncyCastleProvider.INSTANCE.getProvider());
+	public Cipher createCipher(String transformation) {
+		try {
+			return Cipher.getInstance(transformation, GlobalBouncyCastleProvider.INSTANCE.getProvider());
+		}
+		catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			throw new GeneralCryptoException(e);
+		}
 	}
 
 	public SecretKeySpec createKey(byte[] key, String algorithmName) {
