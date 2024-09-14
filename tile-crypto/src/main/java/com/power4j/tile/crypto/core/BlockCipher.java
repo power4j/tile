@@ -16,8 +16,7 @@
 
 package com.power4j.tile.crypto.core;
 
-import com.power4j.tile.crypto.wrapper.HexDecoder;
-import com.power4j.tile.crypto.wrapper.HexEncoder;
+import com.power4j.tile.crypto.core.encode.HexEncoder;
 import com.power4j.tile.crypto.wrapper.InputDecoder;
 import com.power4j.tile.crypto.wrapper.OutputEncoder;
 
@@ -119,7 +118,7 @@ public interface BlockCipher {
 	 * @see TextCipherBuilder
 	 */
 	default String encryptHex(byte[] data) throws GeneralCryptoException {
-		return encryptWith(InputDecoder.NO_OP, HexEncoder.DEFAULT, data);
+		return encryptWith(InputDecoder.NO_OP, HexEncoder.DEFAULT::encode, data);
 	}
 
 	/**
@@ -131,7 +130,7 @@ public interface BlockCipher {
 	 * @see TextCipherBuilder
 	 */
 	default byte[] decryptHex(String data) throws GeneralCryptoException {
-		return decryptWith(HexDecoder.DEFAULT, OutputEncoder.NO_OP, data);
+		return decryptWith(HexEncoder.DEFAULT::decode, OutputEncoder.NO_OP, data);
 	}
 
 }
