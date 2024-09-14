@@ -28,24 +28,22 @@ import com.power4j.tile.crypto.wrapper.OutputEncoder;
 public interface BlockCipher {
 
 	/**
-	 * 算法名称
-	 * @return 算法名称
-	 */
-	String getAlgorithmName();
-
-	/**
-	 * 块的大小(字节)
-	 * @return 块的大小(字节)
-	 */
-	int getBlockSize();
-
-	/**
 	 * 加密
 	 * @param data 输入数据
 	 * @return 返回密文
 	 * @throws GeneralCryptoException
 	 */
-	byte[] encrypt(byte[] data) throws GeneralCryptoException;
+	default byte[] encrypt(byte[] data) throws GeneralCryptoException {
+		return encryptEnvelope(data).getCipher();
+	}
+
+	/**
+	 * 加密
+	 * @param data 输入数据
+	 * @return CipherEnvelope
+	 * @throws GeneralCryptoException
+	 */
+	CipherBlobEnvelope encryptEnvelope(byte[] data) throws GeneralCryptoException;
 
 	/**
 	 * 解密
@@ -53,7 +51,32 @@ public interface BlockCipher {
 	 * @return 返回解密数据
 	 * @throws GeneralCryptoException
 	 */
-	byte[] decrypt(byte[] data) throws GeneralCryptoException;
+	default byte[] decrypt(byte[] data) throws GeneralCryptoException {
+		Verified<byte[]> result = decrypt(new CipherBlob(data, null), true);
+		if (!result.isPass()) {
+			Throwable throwable = result.getCause();
+			if (throwable != null) {
+				if (throwable instanceof GeneralCryptoException) {
+					throw (GeneralCryptoException) throwable;
+				}
+				else {
+					throw new GeneralCryptoException(throwable);
+				}
+			}
+			throw new GeneralCryptoException("Data verification failed");
+		}
+		assert result.getData() != null;
+		return result.getData();
+	}
+
+	/**
+	 * 解密并验证校验和
+	 * @param store 密文信息
+	 * @param skipCheck 是否跳过校验
+	 * @return 返回解密数据
+	 * @throws GeneralCryptoException
+	 */
+	Verified<byte[]> decrypt(CipherBlob store, boolean skipCheck) throws GeneralCryptoException;
 
 	/**
 	 * 加密,支持输入和输出的转换
@@ -92,6 +115,8 @@ public interface BlockCipher {
 	 * @param data 需要加密的数据
 	 * @return 加密后的16进制字符串
 	 * @throws GeneralCryptoException
+	 * @deprecated use {@link TextCipher } instead
+	 * @see TextCipherBuilder
 	 */
 	default String encryptHex(byte[] data) throws GeneralCryptoException {
 		return encryptWith(InputDecoder.NO_OP, HexEncoder.DEFAULT, data);
@@ -102,6 +127,8 @@ public interface BlockCipher {
 	 * @param data 需要解密的数据,16进制字符串格式
 	 * @return 解密后的数据
 	 * @throws GeneralCryptoException
+	 * @deprecated use {@link TextCipher } instead
+	 * @see TextCipherBuilder
 	 */
 	default byte[] decryptHex(String data) throws GeneralCryptoException {
 		return decryptWith(HexDecoder.DEFAULT, OutputEncoder.NO_OP, data);

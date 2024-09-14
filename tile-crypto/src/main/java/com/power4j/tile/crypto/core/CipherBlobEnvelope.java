@@ -14,12 +14,40 @@
  * limitations under the License.
  */
 
-/**
- * @author CJ (power4j@outlook.com)
- * @date 2021/6/2
- * @since 1.0
- */
-@NonNullApi
 package com.power4j.tile.crypto.core;
 
-import org.springframework.lang.NonNullApi;
+import lombok.Builder;
+import lombok.Getter;
+import org.springframework.lang.Nullable;
+
+import java.util.Optional;
+
+/**
+ * @author CJ (power4j@outlook.com)
+ * @since 1.0
+ */
+@Getter
+@Builder
+public class CipherBlobEnvelope {
+
+	private final String algorithm;
+
+	private final String padding;
+
+	private final String mode;
+
+	@Nullable
+	private final byte[] iv;
+
+	private final byte[] cipher;
+
+	private final byte[] checksum;
+
+	public Optional<byte[]> getIvOptional() {
+		if (iv == null || iv.length == 0) {
+			return Optional.empty();
+		}
+		return Optional.of(iv);
+	}
+
+}

@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-/**
- * @author CJ (power4j@outlook.com)
- * @date 2021/6/2
- * @since 1.0
- */
-@NonNullApi
 package com.power4j.tile.crypto.core;
 
-import org.springframework.lang.NonNullApi;
+/**
+ * 针对文本数据的解密
+ *
+ * @author CJ (power4j@outlook.com)
+ * @since 1.6
+ */
+public interface TextDecrypt {
+
+	/**
+	 * 解密
+	 * @param data 输入数据
+	 * @return 返回解密数据
+	 * @throws GeneralCryptoException
+	 */
+	String decrypt(String data) throws GeneralCryptoException;
+
+}

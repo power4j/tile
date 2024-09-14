@@ -14,12 +14,28 @@
  * limitations under the License.
  */
 
+package com.power4j.tile.crypto.bc;
+
 /**
  * @author CJ (power4j@outlook.com)
- * @date 2021/6/2
  * @since 1.0
  */
-@NonNullApi
-package com.power4j.tile.crypto.core;
+public interface Spec {
 
-import org.springframework.lang.NonNullApi;
+	String ALGORITHM_SM4 = "SM4";
+
+	String ALGORITHM_SM3 = "SM3";
+
+	String MODE_ECB = "ECB";
+
+	String MODE_CBC = "CBC";
+
+	String MODE_CFB = "CFB";
+
+	String MODE_OFB = "OFB";
+
+	String PADDING_PKCS7 = "PKCS7Padding";
+
+	String PADDING_NO_PADDING = "NoPadding";
+
+}

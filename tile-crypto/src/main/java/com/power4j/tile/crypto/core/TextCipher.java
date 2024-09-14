@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-/**
- * @author CJ (power4j@outlook.com)
- * @date 2021/6/2
- * @since 1.0
- */
-@NonNullApi
 package com.power4j.tile.crypto.core;
 
-import org.springframework.lang.NonNullApi;
+/**
+ * 针对文本数据的加解密
+ *
+ * @author CJ (power4j@outlook.com)
+ * @since 1.6
+ */
+public interface TextCipher extends TextDecrypt, TextEncrypt {
+
+}

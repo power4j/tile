@@ -14,12 +14,32 @@
  * limitations under the License.
  */
 
-/**
- * @author CJ (power4j@outlook.com)
- * @date 2021/6/2
- * @since 1.0
- */
-@NonNullApi
 package com.power4j.tile.crypto.core;
 
-import org.springframework.lang.NonNullApi;
+/**
+ * 针对文本数据的加密
+ *
+ * @author CJ (power4j@outlook.com)
+ * @since 1.6
+ */
+public interface TextEncrypt {
+
+	/**
+	 * 加密
+	 * @param data 输入数据
+	 * @return 返回密文
+	 * @throws GeneralCryptoException
+	 */
+	default String encrypt(String data) throws GeneralCryptoException {
+		return encryptEnvelope(data).getCiphertext();
+	}
+
+	/**
+	 * 加密
+	 * @param data 输入数据
+	 * @return CiphertextEnvelope
+	 * @throws GeneralCryptoException
+	 */
+	CiphertextEnvelope encryptEnvelope(String data) throws GeneralCryptoException;
+
+}

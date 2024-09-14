@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
+package com.power4j.tile.crypto.core.encode;
+
 /**
  * @author CJ (power4j@outlook.com)
- * @date 2021/6/2
- * @since 1.0
+ * @since 1.6
  */
-@NonNullApi
-package com.power4j.tile.crypto.core;
+public class BufferEncodeException extends RuntimeException {
 
-import org.springframework.lang.NonNullApi;
+	public BufferEncodeException(String message) {
+		super(message);
+	}
+
+	public BufferEncodeException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public BufferEncodeException(Throwable cause) {
+		super(cause);
+	}
+
+}
