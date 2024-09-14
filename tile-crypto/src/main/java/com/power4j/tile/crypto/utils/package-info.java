@@ -17,9 +17,9 @@
 /**
  * @author CJ (power4j@outlook.com)
  * @date 2021/6/2
- * @since 1.0
+ * @since 1.6
  */
 @NonNullApi
-package com.power4j.tile.crypto.core;
+package com.power4j.tile.crypto.utils;
 
 import org.springframework.lang.NonNullApi;

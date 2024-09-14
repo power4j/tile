@@ -14,12 +14,29 @@
  * limitations under the License.
  */
 
+package com.power4j.tile.crypto.dynamic;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 /**
  * @author CJ (power4j@outlook.com)
- * @date 2021/6/2
- * @since 1.0
+ * @since 1.6
  */
-@NonNullApi
-package com.power4j.tile.crypto.core;
+public interface KeyPool {
 
-import org.springframework.lang.NonNullApi;
+	/**
+	 * 获取一个加密密钥
+	 * @return 密钥信息,没有可用密钥返回 {@link Optional#empty()} }
+	 */
+	Optional<DynamicKey> encryptKey(long param);
+
+	/**
+	 * 获取一组解密密钥
+	 * @param param 密钥参数
+	 * @return 密钥列表,没有可用密钥返回 {@link Collections#emptyList() }
+	 */
+	List<DynamicKey> decryptKeys(long param);
+
+}

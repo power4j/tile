@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-package com.power4j.tile.crypto.wrapper;
+package com.power4j.tile.crypto.core;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author CJ (power4j@outlook.com)
  * @since 1.0
  */
-public class HexDecoder implements InputDecoder<String> {
+@Getter
+@RequiredArgsConstructor
+public class CipherBlob {
 
-	public static final HexDecoder DEFAULT = new HexDecoder();
+	private final byte[] cipher;
 
-	@Override
-	public byte[] decode(String data) throws DecodeException {
-		try {
-			return Hex.decodeHex(data);
-		}
-		catch (DecoderException e) {
-			throw new DecodeException(e.getMessage(), e);
-		}
-	}
+	private final byte[] checksum;
 
 }

@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
+package com.power4j.tile.crypto.dynamic;
+
+import com.power4j.tile.crypto.core.CipherBlob;
+import com.power4j.tile.crypto.core.GeneralCryptoException;
+
 /**
  * @author CJ (power4j@outlook.com)
- * @date 2021/6/2
  * @since 1.0
  */
-@NonNullApi
-package com.power4j.tile.crypto.core;
+public interface DynamicDecrypt {
 
-import org.springframework.lang.NonNullApi;
+	/**
+	 * 解密
+	 * @param store 密文信息
+	 * @return 返回解密结果
+	 * @throws GeneralCryptoException
+	 */
+	DynamicDecryptResult decrypt(CipherBlob store) throws GeneralCryptoException;
+
+}

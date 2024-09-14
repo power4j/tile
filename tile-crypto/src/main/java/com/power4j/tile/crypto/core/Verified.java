@@ -14,12 +14,36 @@
  * limitations under the License.
  */
 
-/**
- * @author CJ (power4j@outlook.com)
- * @date 2021/6/2
- * @since 1.0
- */
-@NonNullApi
 package com.power4j.tile.crypto.core;
 
-import org.springframework.lang.NonNullApi;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
+
+import java.util.Objects;
+
+/**
+ * @author CJ (power4j@outlook.com)
+ * @since 1.0
+ */
+@Getter
+@RequiredArgsConstructor
+public class Verified<T> {
+
+	private final boolean pass;
+
+	@Nullable
+	private final T data;
+
+	@Nullable
+	private final Throwable cause;
+
+	public static <T> Verified<T> pass(T data) {
+		return new Verified<>(true, Objects.requireNonNull(data), null);
+	}
+
+	public static <T> Verified<T> fail(@Nullable T data, @Nullable Throwable cause) {
+		return new Verified<>(false, data, cause);
+	}
+
+}

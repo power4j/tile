@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
+package com.power4j.tile.crypto.utils;
+
+import com.power4j.tile.crypto.core.GeneralCryptoException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * @author CJ (power4j@outlook.com)
- * @date 2021/6/2
  * @since 1.0
  */
-@NonNullApi
-package com.power4j.tile.crypto.core;
+class CryptoUtilTest {
 
-import org.springframework.lang.NonNullApi;
+	@Test
+	void shouldThrowIfValueIsInvalid() {
+		Assertions.assertThrows(GeneralCryptoException.class, () -> CryptoUtil.decodeHex("G", null));
+		Assertions.assertThrows(GeneralCryptoException.class, () -> CryptoUtil.decodeBase64("R", null));
+	}
+
+}

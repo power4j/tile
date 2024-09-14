@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
+package com.power4j.tile.crypto.dynamic;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 /**
  * @author CJ (power4j@outlook.com)
- * @date 2021/6/2
- * @since 1.0
+ * @since 1.6
  */
-@NonNullApi
-package com.power4j.tile.crypto.core;
+@Getter
+@RequiredArgsConstructor
+public class DynamicKey {
 
-import org.springframework.lang.NonNullApi;
+	private final long index;
+
+	private final byte[] key;
+
+}

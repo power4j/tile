@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.power4j.tile.crypto.wrapper;
+package com.power4j.tile.crypto.core.encode;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
 /**
  * @author CJ (power4j@outlook.com)
- * @since 1.0
+ * @since 1.6
  */
 @RequiredArgsConstructor
-public class HexEncoder implements OutputEncoder<String> {
+public class HexEncoder extends AbstractEncoder implements BufferEncoder {
 
 	private final boolean lowerCase;
 
@@ -35,8 +36,23 @@ public class HexEncoder implements OutputEncoder<String> {
 	public static final HexEncoder DEFAULT = LOWER;
 
 	@Override
-	public String encode(byte[] data) throws EncodeException {
+	protected String doEncode(byte[] data, int offset, int length) {
 		return Hex.encodeHexString(data, lowerCase);
+	}
+
+	@Override
+	protected byte[] doDecode(String data) {
+		try {
+			return Hex.decodeHex(data);
+		}
+		catch (DecoderException e) {
+			throw new BufferEncodeException("Hex Decode error:" + e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public String algorithm() {
+		return "hex";
 	}
 
 }

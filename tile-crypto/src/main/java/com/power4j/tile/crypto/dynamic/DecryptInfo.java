@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
+package com.power4j.tile.crypto.dynamic;
+
+import lombok.Builder;
+import lombok.Getter;
+
 /**
  * @author CJ (power4j@outlook.com)
- * @date 2021/6/2
  * @since 1.0
  */
-@NonNullApi
-package com.power4j.tile.crypto.core;
+@Getter
+@Builder
+public class DecryptInfo {
 
-import org.springframework.lang.NonNullApi;
+	private final boolean matched;
+
+	private final long keyIndex;
+
+	private final byte[] data;
+
+	private final byte[] checksum;
+
+}
