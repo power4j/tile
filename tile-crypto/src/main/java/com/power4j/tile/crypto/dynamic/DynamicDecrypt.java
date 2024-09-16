@@ -16,8 +16,8 @@
 
 package com.power4j.tile.crypto.dynamic;
 
-import com.power4j.tile.crypto.core.CipherBlob;
 import com.power4j.tile.crypto.core.GeneralCryptoException;
+import com.power4j.tile.crypto.core.UncheckedCipher;
 
 /**
  * @author CJ (power4j@outlook.com)
@@ -31,6 +31,6 @@ public interface DynamicDecrypt {
 	 * @return 返回解密结果
 	 * @throws GeneralCryptoException
 	 */
-	DynamicDecryptResult decrypt(CipherBlob store) throws GeneralCryptoException;
+	DynamicDecryptResult decrypt(UncheckedCipher store) throws GeneralCryptoException;
 
 }

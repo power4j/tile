@@ -16,18 +16,19 @@
 
 package com.power4j.tile.crypto.dynamic;
 
-import com.power4j.tile.crypto.core.BlockCipher;
-import com.power4j.tile.crypto.core.BlockCipherBuilder;
-import com.power4j.tile.crypto.core.CipherBlob;
 import com.power4j.tile.crypto.core.GeneralCryptoException;
+import com.power4j.tile.crypto.core.QuickCipher;
+import com.power4j.tile.crypto.core.QuickCipherBuilder;
+import com.power4j.tile.crypto.core.Slice;
+import com.power4j.tile.crypto.core.UncheckedCipher;
 import com.power4j.tile.crypto.core.Verified;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author CJ (power4j@outlook.com)
@@ -49,11 +50,13 @@ public class SimpleDynamicDecrypt implements DynamicDecrypt {
 
 	private final Function<byte[], byte[]> checksumCalculator;
 
+	private final Supplier<Long> paramterSupplier;
+
 	@Override
-	public DynamicDecryptResult decrypt(CipherBlob store) {
-		final long timestamp = System.currentTimeMillis();
-		List<DynamicKey> keyList = keyPool.decryptKeys(timestamp);
-		List<DynamicKey> ivList = ivPool.decryptKeys(timestamp);
+	public DynamicDecryptResult decrypt(UncheckedCipher store) {
+		final long timestamp = paramterSupplier.get();
+		List<DynamicKey> keyList = keyPool.some(timestamp);
+		List<DynamicKey> ivList = ivPool.some(timestamp);
 		if (keyList.isEmpty()) {
 			throw new GeneralCryptoException("No key found");
 		}
@@ -80,23 +83,23 @@ public class SimpleDynamicDecrypt implements DynamicDecrypt {
 		return DynamicDecryptResult.fail(tried);
 	}
 
-	protected DecryptInfo tryOne(CipherBlob store, DynamicKey key, @Nullable DynamicKey iv) {
+	protected DecryptInfo tryOne(UncheckedCipher input, DynamicKey key, @Nullable DynamicKey iv) {
 		try {
-			BlockCipher cipher = BlockCipherBuilder.algorithm(algorithmName)
+			QuickCipher cipher = QuickCipherBuilder.algorithm(algorithmName)
 				.mode(mode)
 				.padding(padding)
 				.secretKey(key.getKey())
 				.ivParameter(iv == null ? null : iv.getKey())
 				.checksumCalculator(checksumCalculator)
 				.checksumVerifier(
-						(cipherBlob, bytes) -> Arrays.equals(cipherBlob.getChecksum(), checksumCalculator.apply(bytes)))
+						(cipherBlob, bytes) -> cipherBlob.getChecksum().dataEquals(checksumCalculator.apply(bytes)))
 				.build();
-			Verified<byte[]> verified = cipher.decrypt(store, false);
+			Verified<byte[]> verified = cipher.decrypt(input, false);
 			return DecryptInfo.builder()
 				.matched(verified.isPass())
-				.keyIndex(key.getIndex())
-				.checksum(store.getChecksum())
-				.data(verified.getData())
+				.keyTag(key.getTag())
+				.checksum(input.getChecksum())
+				.data(Slice.wrap(verified.getData()))
 				.build();
 		}
 		catch (GeneralCryptoException e) {

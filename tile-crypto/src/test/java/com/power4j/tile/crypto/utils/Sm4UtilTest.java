@@ -16,7 +16,7 @@
 
 package com.power4j.tile.crypto.utils;
 
-import com.power4j.tile.crypto.core.BlockCipher;
+import com.power4j.tile.crypto.core.QuickCipher;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -36,39 +36,39 @@ class Sm4UtilTest {
 	@Test
 	void testEcbWithPadding() {
 
-		BlockCipher sm4 = Sm4Util.useEcbWithPadding("2aa67d8833e28fa88b9ad09aaaa90619");
-		byte[] enc = sm4.encrypt(Hex.decode("0001515641703792"));
+		QuickCipher sm4 = Sm4Util.useEcbWithPadding("2aa67d8833e28fa88b9ad09aaaa90619");
+		byte[] enc = sm4.encrypt(Hex.decode("0001515641703792")).getCipher();
 		assertEquals("9e8078a5d816f67ed3a1d536294c8509", Hex.toHexString(enc));
 
 		byte[] plain = sm4.decrypt(enc);
 		assertEquals("0001515641703792", Hex.toHexString(plain));
 
 		sm4 = Sm4Util.useEcbWithPadding("4aa697a7d8394925884767a5888a0c8a");
-		String rootEnc = Hex.toHexString(sm4.encrypt("root".getBytes(StandardCharsets.UTF_8)));
+		String rootEnc = Hex.toHexString(sm4.encrypt("root".getBytes(StandardCharsets.UTF_8)).getCipher());
 		System.out.println("SM4 ECB Enc(root):" + rootEnc);
 		Assertions.assertEquals("683ed60b4f4bca8ec7962742a9183ce4", rootEnc);
 	}
 
 	@Test
 	void testCbcWithPadding() {
-		BlockCipher sm4 = Sm4Util.useCbcWithPadding("2aa67d8833e28fa88b9ad09aaaa90619",
+		QuickCipher sm4 = Sm4Util.useCbcWithPadding("2aa67d8833e28fa88b9ad09aaaa90619",
 				"82ac066e232a6b19e203f531855a809e");
-		byte[] enc = sm4.encrypt(Hex.decode("0001515641703792"));
+		byte[] enc = sm4.encrypt(Hex.decode("0001515641703792")).getCipher();
 		assertEquals("f702064157cf93cf3f589d0246388450", Hex.toHexString(enc));
 
 		byte[] plain = sm4.decrypt(enc);
 		assertEquals("0001515641703792", Hex.toHexString(plain));
 
 		sm4 = Sm4Util.useCbcWithPadding("4aa697a7d8394925884767a5888a0c8a", "80c0b436a7a15b89e8622436c6d6f04e");
-		String rootEnc = Hex.toHexString(sm4.encrypt("root".getBytes(StandardCharsets.UTF_8)));
+		String rootEnc = Hex.toHexString(sm4.encrypt("root".getBytes(StandardCharsets.UTF_8)).getCipher());
 		System.out.println("SM4 CBC Enc(root):" + rootEnc);
 		Assertions.assertEquals("6172a52d39ab724781bc835775ce2a1b", rootEnc);
 	}
 
 	@Test
 	void testOfb() {
-		BlockCipher sm4 = Sm4Util.useOfb("2aa67d8833e28fa88b9ad09aaaa90619", "ccbb066e232a6b19e203f531855a809e");
-		byte[] enc = sm4.encrypt(Hex.decode("0001515641703792"));
+		QuickCipher sm4 = Sm4Util.useOfb("2aa67d8833e28fa88b9ad09aaaa90619", "ccbb066e232a6b19e203f531855a809e");
+		byte[] enc = sm4.encrypt(Hex.decode("0001515641703792")).getCipher();
 		assertEquals("127ea1f04ce83d57", Hex.toHexString(enc));
 
 		byte[] plain = sm4.decrypt(enc);
@@ -77,8 +77,8 @@ class Sm4UtilTest {
 
 	@Test
 	void testCfb() {
-		BlockCipher sm4 = Sm4Util.useCfb("2aa67d8833e28fa88b9ad09aaaa90619", "aabb066e232a6b19e203f531855a809e");
-		byte[] enc = sm4.encrypt(Hex.decode("0001515641703792"));
+		QuickCipher sm4 = Sm4Util.useCfb("2aa67d8833e28fa88b9ad09aaaa90619", "aabb066e232a6b19e203f531855a809e");
+		byte[] enc = sm4.encrypt(Hex.decode("0001515641703792")).getCipher();
 		assertEquals("caeeb2acacadf53a", Hex.toHexString(enc));
 
 		byte[] plain = sm4.decrypt(enc);
@@ -87,7 +87,7 @@ class Sm4UtilTest {
 
 	@Test
 	void testHexProcess() {
-		BlockCipher sm4 = Sm4Util.useCbcWithPadding("2aa67d8833e28fa88b9ad09aaaa90619",
+		QuickCipher sm4 = Sm4Util.useCbcWithPadding("2aa67d8833e28fa88b9ad09aaaa90619",
 				"82ac066e232a6b19e203f531855a809e");
 		byte[] plain = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 		String enc = sm4.encryptHex(plain);

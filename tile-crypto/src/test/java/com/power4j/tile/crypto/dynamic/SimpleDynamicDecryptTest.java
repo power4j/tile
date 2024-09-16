@@ -17,9 +17,9 @@
 package com.power4j.tile.crypto.dynamic;
 
 import com.power4j.tile.crypto.bc.Spec;
-import com.power4j.tile.crypto.core.BlockCipher;
-import com.power4j.tile.crypto.core.CipherBlob;
-import com.power4j.tile.crypto.core.CipherBlobEnvelope;
+import com.power4j.tile.crypto.core.CipherBlobDetails;
+import com.power4j.tile.crypto.core.QuickCipher;
+import com.power4j.tile.crypto.core.UncheckedCipher;
 import com.power4j.tile.crypto.utils.Sm4Util;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -49,7 +49,7 @@ class SimpleDynamicDecryptTest {
 	private final Function<byte[], byte[]> checksumCalculator = (b) -> Arrays.copyOf(b, 8);
 
 	@Test
-	void decrypt() {
+	void rotationDecryptTest() {
 		byte[] plain = "hello".getBytes(StandardCharsets.UTF_8);
 		KeyPool pool = Pools.rotation(testKey1, testKey2, testKey3);
 		SimpleDynamicDecrypt dec = DynamicDecryptBuilder.sm4Cbc()
@@ -58,18 +58,56 @@ class SimpleDynamicDecryptTest {
 			.ivPool(Pools.fixed(testIv))
 			.simple();
 
-		BlockCipher enc = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
+		QuickCipher enc = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
 			.secretKey(testKey3)
 			.ivParameter(testIv)
 			.checksumCalculator(checksumCalculator)
 			.build();
-		CipherBlobEnvelope envelope = enc.encryptEnvelope(plain);
-		CipherBlob store = new CipherBlob(envelope.getCipher(), envelope.getChecksum());
+		CipherBlobDetails details = enc.encrypt(plain);
+		UncheckedCipher store = UncheckedCipher.of(details.getCipher(), details.getChecksum());
 		DynamicDecryptResult result = dec.decrypt(store);
 
 		Assertions.assertTrue(result.success());
 		Assertions.assertEquals(3, result.getTried().size());
-		Assertions.assertArrayEquals(plain, result.requiredMatched().getData());
+		Assertions.assertTrue(result.requiredMatched().getData().dataEquals(plain));
+	}
+
+	@Test
+	void timeBasedDecryptTest() {
+		byte[] plain = "hello".getBytes(StandardCharsets.UTF_8);
+		long time = System.currentTimeMillis();
+		int windowSize = 3;
+		int intervalSeconds = 60;
+		KeyPool pool = TimeBasedPool.ofSize(16)
+			.fillBytes(new byte[] { 0x01, 0x02, 0x03, 0x04 })
+			.windowSize(windowSize)
+			.intervalSeconds(intervalSeconds)
+			.build();
+
+		DynamicDecryptBuilder builder = DynamicDecryptBuilder.sm4Cbc()
+			.checksumCalculator(checksumCalculator)
+			.keyPool(pool)
+			.ivPool(Pools.fixed(testIv));
+
+		QuickCipher enc = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
+			.secretKey(pool.one(time).getKey())
+			.ivParameter(testIv)
+			.checksumCalculator(checksumCalculator)
+			.build();
+		CipherBlobDetails details = enc.encrypt(plain);
+		UncheckedCipher store = UncheckedCipher.of(details.getCipher(), details.getChecksum());
+
+		DynamicDecryptResult result = builder.parameterSupplier(() -> time).simple().decrypt(store);
+		Assertions.assertTrue(result.success());
+		Assertions.assertTrue(result.requiredMatched().getData().dataEquals(plain));
+
+		result = builder.parameterSupplier(() -> time + intervalSeconds * 1000 * windowSize).simple().decrypt(store);
+		Assertions.assertTrue(result.success());
+		Assertions.assertTrue(result.requiredMatched().getData().dataEquals(plain));
+
+		result = builder.parameterSupplier(() -> time - intervalSeconds * 1000 * windowSize).simple().decrypt(store);
+		Assertions.assertTrue(result.success());
+		Assertions.assertTrue(result.requiredMatched().getData().dataEquals(plain));
 	}
 
 }

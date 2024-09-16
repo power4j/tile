@@ -18,6 +18,7 @@ package com.power4j.tile.crypto.core;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
 
 /**
  * @author CJ (power4j@outlook.com)
@@ -25,10 +26,21 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-public class CipherBlob {
+public class UncheckedCipher {
 
-	private final byte[] cipher;
+	private final Slice cipher;
 
-	private final byte[] checksum;
+	private final Slice checksum;
+
+	public static UncheckedCipher of(byte[] cipher, @Nullable byte[] checksum) {
+		if (checksum == null) {
+			checksum = new byte[0];
+		}
+		return new UncheckedCipher(Slice.wrap(cipher), Slice.wrap(checksum));
+	}
+
+	public static UncheckedCipher of(byte[] cipher) {
+		return of(cipher, null);
+	}
 
 }

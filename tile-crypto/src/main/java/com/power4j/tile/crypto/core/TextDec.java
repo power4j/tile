@@ -17,29 +17,19 @@
 package com.power4j.tile.crypto.core;
 
 /**
- * 针对文本数据的加密
+ * 针对文本数据的解密
  *
  * @author CJ (power4j@outlook.com)
  * @since 1.6
  */
-public interface TextEncrypt {
+public interface TextDec {
 
 	/**
-	 * 加密
+	 * 解密
 	 * @param data 输入数据
-	 * @return 返回密文
+	 * @return 返回解密数据
 	 * @throws GeneralCryptoException
 	 */
-	default String encrypt(String data) throws GeneralCryptoException {
-		return encryptEnvelope(data).getCiphertext();
-	}
-
-	/**
-	 * 加密
-	 * @param data 输入数据
-	 * @return CiphertextEnvelope
-	 * @throws GeneralCryptoException
-	 */
-	CiphertextEnvelope encryptEnvelope(String data) throws GeneralCryptoException;
+	String decrypt(String data) throws GeneralCryptoException;
 
 }

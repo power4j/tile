@@ -16,7 +16,7 @@
 
 package com.power4j.tile.crypto.core;
 
-import com.power4j.tile.crypto.bc.BouncyCastleBlockCipher;
+import com.power4j.tile.crypto.bc.BouncyCastleQuickCipher;
 import com.power4j.tile.crypto.bc.Spec;
 import com.power4j.tile.crypto.utils.CryptoUtil;
 import com.power4j.tile.crypto.utils.Validate;
@@ -29,7 +29,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * {@link BlockCipher} Builder<br/>
+ * {@link QuickCipher} Builder<br/>
  * <ul>
  * <li>algorithmName: 密码算法的名称,如 AES,SM4</li>
  * <li>mode: 加密模式,如 ECB, CBC</li>
@@ -45,7 +45,7 @@ import java.util.function.Supplier;
  * @see Spec
  * @see TextCipherBuilder
  */
-public class BlockCipherBuilder {
+public class QuickCipherBuilder {
 
 	private final String algorithmName;
 
@@ -59,90 +59,90 @@ public class BlockCipherBuilder {
 
 	private Function<byte[], byte[]> checksumCalculator;
 
-	private BiFunction<CipherBlob, byte[], Boolean> checksumVerifier;
+	private BiFunction<UncheckedCipher, byte[], Boolean> checksumVerifier;
 
-	BlockCipherBuilder(String algorithmName) {
+	QuickCipherBuilder(String algorithmName) {
 		this.algorithmName = algorithmName;
 	};
 
-	public static BlockCipherBuilder algorithm(String algorithmName) {
-		return new BlockCipherBuilder(algorithmName);
+	public static QuickCipherBuilder algorithm(String algorithmName) {
+		return new QuickCipherBuilder(algorithmName);
 	}
 
-	public BlockCipherBuilder mode(String mode) {
+	public QuickCipherBuilder mode(String mode) {
 		this.mode = mode;
 		return this;
 	}
 
-	public BlockCipherBuilder padding(String padding) {
+	public QuickCipherBuilder padding(String padding) {
 		this.padding = padding;
 		return this;
 	}
 
-	public BlockCipherBuilder secretKeySpecSupplier(Supplier<SecretKeySpec> supplier) {
+	public QuickCipherBuilder secretKeySpecSupplier(Supplier<SecretKeySpec> supplier) {
 		this.secretKeySpecSupplier = supplier;
 		return this;
 	}
 
-	public BlockCipherBuilder secretKey(byte[] key) {
+	public QuickCipherBuilder secretKey(byte[] key) {
 		return secretKeySpecSupplier(() -> CryptoUtil.createKey(key, algorithmName));
 	}
 
-	public BlockCipherBuilder secretKeyHex(String val) {
+	public QuickCipherBuilder secretKeyHex(String val) {
 		this.secretKeySpecSupplier = () -> CryptoUtil.createKey(CryptoUtil.decodeHex(val, null), algorithmName);
 		return this;
 	}
 
-	public BlockCipherBuilder secretKeyBase64(String val) {
+	public QuickCipherBuilder secretKeyBase64(String val) {
 		this.secretKeySpecSupplier = () -> CryptoUtil.createKey(CryptoUtil.decodeBase64(val, null), algorithmName);
 		return this;
 	}
 
-	public BlockCipherBuilder ivParameterSpecSupplier(Supplier<IvParameterSpec> supplier) {
+	public QuickCipherBuilder ivParameterSpecSupplier(Supplier<IvParameterSpec> supplier) {
 		this.ivParameterSpecSupplier = supplier;
 		return this;
 	}
 
-	public BlockCipherBuilder ivParameter(@Nullable byte[] iv) {
+	public QuickCipherBuilder ivParameter(@Nullable byte[] iv) {
 		if (iv == null) {
 			return ivParameterSpecSupplier(() -> null);
 		}
 		return ivParameterSpecSupplier(() -> new IvParameterSpec(iv));
 	}
 
-	public BlockCipherBuilder ivParameterHex(@Nullable String val) {
+	public QuickCipherBuilder ivParameterHex(@Nullable String val) {
 		if (val == null) {
 			return ivParameterSpecSupplier(() -> null);
 		}
 		return ivParameterSpecSupplier(() -> new IvParameterSpec(CryptoUtil.decodeHex(val, null)));
 	}
 
-	public BlockCipherBuilder ivParameterBase64(String val) {
+	public QuickCipherBuilder ivParameterBase64(String val) {
 		this.ivParameterSpecSupplier = () -> new IvParameterSpec(CryptoUtil.decodeBase64(val, null));
 		return this;
 	}
 
-	public BlockCipherBuilder checksumCalculator(@Nullable Function<byte[], byte[]> calculator) {
+	public QuickCipherBuilder checksumCalculator(@Nullable Function<byte[], byte[]> calculator) {
 		this.checksumCalculator = calculator;
 		return this;
 	}
 
-	public BlockCipherBuilder sm3ChecksumCalculator() {
+	public QuickCipherBuilder sm3ChecksumCalculator() {
 		this.checksumCalculator = CryptoUtil.SM3_CHECKSUM_CALCULATOR;
 		return this;
 	}
 
-	public BlockCipherBuilder checksumVerifier(BiFunction<CipherBlob, byte[], Boolean> verifier) {
+	public QuickCipherBuilder checksumVerifier(BiFunction<UncheckedCipher, byte[], Boolean> verifier) {
 		this.checksumVerifier = verifier;
 		return this;
 	}
 
-	public BlockCipherBuilder sm3ChecksumVerifier() {
+	public QuickCipherBuilder sm3ChecksumVerifier() {
 		this.checksumVerifier = CryptoUtil.SM3_CHECKSUM_VERIFIER;
 		return this;
 	}
 
-	public BouncyCastleBlockCipher build() {
+	public BouncyCastleQuickCipher build() {
 		Validate.notEmpty(algorithmName, "algorithmName must not be empty");
 		Validate.notEmpty(mode, "mode must not be empty");
 		Validate.notEmpty(padding, "padding must not be empty");
@@ -150,12 +150,12 @@ public class BlockCipherBuilder {
 
 		Function<byte[], byte[]> calculator = checksumCalculator == null ? CryptoUtil.EMPTY_CHECKSUM_CALCULATOR
 				: checksumCalculator;
-		BiFunction<CipherBlob, byte[], Boolean> verifier = checksumVerifier == null
+		BiFunction<UncheckedCipher, byte[], Boolean> verifier = checksumVerifier == null
 				? CryptoUtil.IGNORED_CHECKSUM_VERIFIER : checksumVerifier;
 		Supplier<IvParameterSpec> ivSpecSupplier = ivParameterSpecSupplier == null ? () -> null
 				: ivParameterSpecSupplier;
 		String transformation = CryptoUtil.transformation(algorithmName, mode, padding);
-		return new BouncyCastleBlockCipher(transformation, secretKeySpecSupplier, ivSpecSupplier, calculator, verifier);
+		return new BouncyCastleQuickCipher(transformation, secretKeySpecSupplier, ivSpecSupplier, calculator, verifier);
 	}
 
 }

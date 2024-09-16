@@ -20,8 +20,6 @@ import com.power4j.tile.crypto.core.GeneralCryptoException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
  * @author CJ (power4j@outlook.com)
  * @since 1.0

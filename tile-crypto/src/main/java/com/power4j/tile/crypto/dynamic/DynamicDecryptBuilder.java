@@ -21,6 +21,7 @@ import com.power4j.tile.crypto.utils.Validate;
 import org.springframework.lang.Nullable;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author CJ (power4j@outlook.com)
@@ -39,6 +40,8 @@ public class DynamicDecryptBuilder {
 	private KeyPool ivPool;
 
 	private Function<byte[], byte[]> checksumCalculator;
+
+	private Supplier<Long> paramterSupplier;
 
 	public DynamicDecryptBuilder(String algorithmName, String mode, String padding) {
 		this.algorithmName = algorithmName;
@@ -85,6 +88,11 @@ public class DynamicDecryptBuilder {
 		return this;
 	}
 
+	public DynamicDecryptBuilder parameterSupplier(Supplier<Long> supplier) {
+		this.paramterSupplier = supplier;
+		return this;
+	}
+
 	public SimpleDynamicDecrypt simple() {
 
 		Validate.notEmpty(algorithmName, "algorithmName must not be empty");
@@ -93,8 +101,10 @@ public class DynamicDecryptBuilder {
 		Validate.notNull(keyPool, "keyPool must not be null");
 		Validate.notNull(checksumCalculator, "checksumCalculator must not be null");
 
+		Supplier<Long> paramSupplier = paramterSupplier == null ? () -> 0L : paramterSupplier;
+
 		return new SimpleDynamicDecrypt(algorithmName, mode, padding, keyPool, ivPool == null ? Pools.empty() : ivPool,
-				checksumCalculator);
+				checksumCalculator, paramSupplier);
 
 	}
 

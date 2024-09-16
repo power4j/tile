@@ -16,6 +16,7 @@
 
 package com.power4j.tile.crypto.dynamic;
 
+import com.power4j.tile.crypto.core.Slice;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -29,10 +30,10 @@ public class DecryptInfo {
 
 	private final boolean matched;
 
-	private final long keyIndex;
+	private final String keyTag;
 
-	private final byte[] data;
+	private final Slice data;
 
-	private final byte[] checksum;
+	private final Slice checksum;
 
 }
