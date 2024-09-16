@@ -16,6 +16,7 @@
 
 package com.power4j.tile.crypto.dynamic;
 
+import com.power4j.tile.crypto.core.GeneralCryptoException;
 import lombok.experimental.UtilityClass;
 
 import java.util.ArrayList;
@@ -23,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -44,7 +44,7 @@ public class Pools {
 	public KeyPool rotation(byte[]... keys) {
 		List<DynamicKey> list = new ArrayList<>(keys.length);
 		for (int i = 0; i < keys.length; i++) {
-			list.add(new DynamicKey(i, keys[i]));
+			list.add(new DynamicKey(Integer.toString(i), keys[i]));
 		}
 		return new RotationPool(list);
 	}
@@ -68,16 +68,16 @@ public class Pools {
 		}
 
 		public FixedPool(long id, byte[] key) {
-			this.key = new DynamicKey(id, key);
+			this.key = new DynamicKey(Long.toString(id), key);
 		}
 
 		@Override
-		public Optional<DynamicKey> encryptKey(long param) {
-			return Optional.of(key);
+		public DynamicKey one(long param) {
+			return key;
 		}
 
 		@Override
-		public List<DynamicKey> decryptKeys(long param) {
+		public List<DynamicKey> some(long param) {
 			return Collections.singletonList(key);
 		}
 
@@ -99,13 +99,13 @@ public class Pools {
 		}
 
 		@Override
-		public Optional<DynamicKey> encryptKey(long param) {
+		public DynamicKey one(long param) {
 			int pos = (int) (index.getAndIncrement() % keys.length);
-			return Optional.of(keys[pos]);
+			return keys[pos];
 		}
 
 		@Override
-		public List<DynamicKey> decryptKeys(long param) {
+		public List<DynamicKey> some(long param) {
 			return Arrays.asList(keys);
 		}
 
@@ -116,13 +116,13 @@ public class Pools {
 		static final EmptyPool INSTANCE = new EmptyPool();
 
 		@Override
-		public Optional<DynamicKey> encryptKey(long param) {
-			return Optional.empty();
+		public DynamicKey one(long param) {
+			throw new GeneralCryptoException("No key available");
 		}
 
 		@Override
-		public List<DynamicKey> decryptKeys(long param) {
-			return Collections.emptyList();
+		public List<DynamicKey> some(long param) {
+			throw new GeneralCryptoException("No key available");
 		}
 
 	}

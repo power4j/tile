@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DynamicKey {
 
-	private final long index;
+	private final String tag;
 
 	private final byte[] key;
 

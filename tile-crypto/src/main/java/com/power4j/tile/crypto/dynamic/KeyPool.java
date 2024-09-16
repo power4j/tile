@@ -27,16 +27,16 @@ import java.util.Optional;
 public interface KeyPool {
 
 	/**
-	 * 获取一个加密密钥
+	 * 获取一个密钥
 	 * @return 密钥信息,没有可用密钥返回 {@link Optional#empty()} }
 	 */
-	Optional<DynamicKey> encryptKey(long param);
+	DynamicKey one(long param);
 
 	/**
-	 * 获取一组解密密钥
+	 * 获取一组密钥
 	 * @param param 密钥参数
 	 * @return 密钥列表,没有可用密钥返回 {@link Collections#emptyList() }
 	 */
-	List<DynamicKey> decryptKeys(long param);
+	List<DynamicKey> some(long param);
 
 }

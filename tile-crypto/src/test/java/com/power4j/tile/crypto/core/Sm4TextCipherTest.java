@@ -109,7 +109,7 @@ class Sm4TextCipherTest {
 			.cipher(c -> c.secretKeyHex(key).ivParameterHex(iv).sm3ChecksumCalculator())
 			.inputEncoding(BufferEncoding.UTF_8)
 			.outputEncoding(BufferEncoding.HEX);
-		CiphertextEnvelope envelope = builder.build().encryptEnvelope(plain);
+		CiphertextDetails envelope = builder.build().encryptEnvelope(plain);
 		System.out.println("encrypted envelope = " + envelope);
 		Assertions.assertNotNull(envelope.getEncoding());
 		Assertions.assertNotNull(envelope.getAlgorithm());

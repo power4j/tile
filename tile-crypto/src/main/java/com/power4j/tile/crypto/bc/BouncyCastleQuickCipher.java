@@ -16,12 +16,14 @@
 
 package com.power4j.tile.crypto.bc;
 
-import com.power4j.tile.crypto.core.BlockCipher;
-import com.power4j.tile.crypto.core.CipherBlob;
-import com.power4j.tile.crypto.core.CipherBlobEnvelope;
+import com.power4j.tile.crypto.core.CipherBlobDetails;
 import com.power4j.tile.crypto.core.GeneralCryptoException;
+import com.power4j.tile.crypto.core.QuickCipher;
+import com.power4j.tile.crypto.core.Slice;
+import com.power4j.tile.crypto.core.UncheckedCipher;
 import com.power4j.tile.crypto.core.Verified;
 import com.power4j.tile.crypto.utils.CryptoUtil;
+import org.springframework.lang.Nullable;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -35,9 +37,9 @@ import java.util.function.Supplier;
  * @author CJ (power4j@outlook.com)
  * @since 1.6
  */
-public class BouncyCastleBlockCipher implements BlockCipher {
+public class BouncyCastleQuickCipher implements QuickCipher {
 
-	private final String transformation;
+	private final Cipher cipher;
 
 	private final Supplier<SecretKeySpec> keySupplier;
 
@@ -47,12 +49,13 @@ public class BouncyCastleBlockCipher implements BlockCipher {
 
 	private final Function<byte[], byte[]> checksumCalculator;
 
-	private final BiFunction<CipherBlob, byte[], Boolean> checksumVerifier;
+	private final BiFunction<UncheckedCipher, byte[], Boolean> checksumVerifier;
 
-	public BouncyCastleBlockCipher(String transformation, Supplier<SecretKeySpec> keySupplier,
+	public BouncyCastleQuickCipher(String transformation, Supplier<SecretKeySpec> keySupplier,
 			Supplier<IvParameterSpec> ivParameterSpecSupplier, Function<byte[], byte[]> checksumCalculator,
-			BiFunction<CipherBlob, byte[], Boolean> checksumVerifier) {
-		this.transformation = transformation;
+			BiFunction<UncheckedCipher, byte[], Boolean> checksumVerifier) {
+		this.cipher = CryptoUtil.createCipher(transformation);
+		;
 		this.keySupplier = keySupplier;
 		this.ivParameterSpecSupplier = ivParameterSpecSupplier;
 		this.checksumCalculator = checksumCalculator;
@@ -61,21 +64,19 @@ public class BouncyCastleBlockCipher implements BlockCipher {
 	}
 
 	@Override
-	public CipherBlobEnvelope encryptEnvelope(byte[] data) throws GeneralCryptoException {
+	public CipherBlobDetails encrypt(byte[] data, int offset, int length) throws GeneralCryptoException {
 		final IvParameterSpec ivParameter = ivParameterSpecSupplier.get();
 		byte[] encrypted;
 		byte[] checksum;
 		try {
 			checksum = checksumCalculator.apply(data);
-			Cipher cipher = CryptoUtil.createCipher(transformation);
-			cipher.init(Cipher.ENCRYPT_MODE, keySupplier.get(), ivParameter);
-			encrypted = cipher.doFinal(data);
+			encrypted = oneStep(Cipher.ENCRYPT_MODE, keySupplier.get(), ivParameter, Slice.wrap(data));
 		}
-		catch (GeneralSecurityException e) {
-			throw new GeneralCryptoException(e.getMessage(), e);
+		catch (Exception e) {
+			throw CryptoUtil.wrapGeneralCryptoException(null, e);
 		}
 		byte[] ivBytes = ivParameter == null ? null : ivParameter.getIV();
-		return CipherBlobEnvelope.builder()
+		return CipherBlobDetails.builder()
 			.algorithm(transformationParts[0])
 			.mode(transformationParts[1])
 			.padding(transformationParts[2])
@@ -86,12 +87,11 @@ public class BouncyCastleBlockCipher implements BlockCipher {
 	}
 
 	@Override
-	public Verified<byte[]> decrypt(CipherBlob store, boolean skipCheck) throws GeneralCryptoException {
+	public Verified<byte[]> decrypt(UncheckedCipher input, boolean skipCheck) throws GeneralCryptoException {
 		byte[] decrypted;
 		try {
-			Cipher cipher = CryptoUtil.createCipher(transformation);
-			cipher.init(Cipher.DECRYPT_MODE, keySupplier.get(), ivParameterSpecSupplier.get());
-			decrypted = cipher.doFinal(store.getCipher());
+			decrypted = oneStep(Cipher.DECRYPT_MODE, keySupplier.get(), ivParameterSpecSupplier.get(),
+					input.getCipher());
 		}
 		catch (GeneralSecurityException e) {
 			return Verified.fail(null, e);
@@ -99,8 +99,14 @@ public class BouncyCastleBlockCipher implements BlockCipher {
 		if (skipCheck) {
 			return Verified.pass(decrypted);
 		}
-		return checksumVerifier.apply(store, decrypted) ? Verified.pass(decrypted) : Verified.fail(decrypted, null);
+		return checksumVerifier.apply(input, decrypted) ? Verified.pass(decrypted) : Verified.fail(decrypted, null);
 
+	}
+
+	protected final synchronized byte[] oneStep(int mode, SecretKeySpec key, @Nullable IvParameterSpec iv, Slice data)
+			throws GeneralSecurityException {
+		cipher.init(mode, key, iv);
+		return cipher.doFinal(data.getData(), data.getOffset(), data.getLength());
 	}
 
 }

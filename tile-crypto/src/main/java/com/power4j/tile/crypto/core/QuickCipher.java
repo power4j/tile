@@ -17,11 +17,9 @@
 package com.power4j.tile.crypto.core;
 
 /**
- * 针对文本数据的加解密
- *
  * @author CJ (power4j@outlook.com)
- * @since 1.6
+ * @since 1.0
  */
-public interface TextCipher extends TextDec, TextEnc {
+public interface QuickCipher extends QuickEnc, QuickDec {
 
 }

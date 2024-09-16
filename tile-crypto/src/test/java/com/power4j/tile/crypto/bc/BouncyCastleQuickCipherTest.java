@@ -16,8 +16,8 @@
 
 package com.power4j.tile.crypto.bc;
 
-import com.power4j.tile.crypto.core.CipherBlob;
-import com.power4j.tile.crypto.core.CipherBlobEnvelope;
+import com.power4j.tile.crypto.core.CipherBlobDetails;
+import com.power4j.tile.crypto.core.UncheckedCipher;
 import com.power4j.tile.crypto.core.Verified;
 import com.power4j.tile.crypto.utils.Sm4Util;
 import org.junit.jupiter.api.Assertions;
@@ -31,7 +31,7 @@ import java.util.function.Function;
  * @author CJ (power4j@outlook.com)
  * @since 1.0
  */
-class BouncyCastleBlockCipherTest {
+class BouncyCastleQuickCipherTest {
 
 	private final byte[] testKey = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C,
 			0x0D, 0x0E, 0x0F, 0x10 };
@@ -42,21 +42,21 @@ class BouncyCastleBlockCipherTest {
 	@Test
 	void encrypt() {
 		byte[] plain = "hello".getBytes(StandardCharsets.UTF_8);
-		BouncyCastleBlockCipher cipher = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
+		BouncyCastleQuickCipher cipher = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
 			.secretKey(testKey)
 			.ivParameter(testIv)
 			.checksumCalculator(null)
 			.build();
-		CipherBlobEnvelope envelope = cipher.encryptEnvelope(plain);
+		CipherBlobDetails details = cipher.encrypt(plain);
 
-		Assertions.assertNotNull(envelope.getAlgorithm());
-		Assertions.assertNotNull(envelope.getMode());
-		Assertions.assertNotNull(envelope.getPadding());
-		Assertions.assertNotNull(envelope.getIv());
-		Assertions.assertNotNull(envelope.getCipher());
-		Assertions.assertNotNull(envelope.getChecksum());
+		Assertions.assertNotNull(details.getAlgorithm());
+		Assertions.assertNotNull(details.getMode());
+		Assertions.assertNotNull(details.getPadding());
+		Assertions.assertNotNull(details.getIv());
+		Assertions.assertNotNull(details.getCipher());
+		Assertions.assertNotNull(details.getChecksum());
 
-		byte[] decrypted = cipher.decrypt(envelope.getCipher());
+		byte[] decrypted = cipher.decrypt(details.getCipher());
 		Assertions.assertArrayEquals(plain, decrypted);
 	}
 
@@ -65,14 +65,14 @@ class BouncyCastleBlockCipherTest {
 		byte[] plain = "hello".getBytes(StandardCharsets.UTF_8);
 		Function<byte[], byte[]> hashFunc = (b) -> Arrays.copyOf(b, 8);
 
-		BouncyCastleBlockCipher cipher = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
+		BouncyCastleQuickCipher cipher = Sm4Util.builder(Spec.MODE_CBC, Spec.PADDING_PKCS7)
 			.secretKey(testKey)
 			.ivParameter(testIv)
 			.checksumCalculator(hashFunc)
 			.build();
-		CipherBlobEnvelope envelope = cipher.encryptEnvelope(plain);
+		CipherBlobDetails details = cipher.encrypt(plain);
 
-		CipherBlob store = new CipherBlob(envelope.getCipher(), envelope.getChecksum());
+		UncheckedCipher store = UncheckedCipher.of(details.getCipher(), details.getChecksum());
 		Verified<byte[]> verified = cipher.decrypt(store, false);
 		Assertions.assertTrue(verified.isPass());
 		Assertions.assertArrayEquals(plain, verified.getData());
