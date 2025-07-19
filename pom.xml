@@ -53,8 +53,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
 
         <!-- Plugin versions -->
-        <spring-javaformat.plugin.version>0.0.46</spring-javaformat.plugin.version>
-        <flatten-maven-plugin.version>1.7.0</flatten-maven-plugin.version>
+        <spring-javaformat.plugin.version>0.0.47</spring-javaformat.plugin.version>
+        <flatten-maven-plugin.version>1.7.1</flatten-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
@@ -62,7 +62,7 @@
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
         <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
-        <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
+        <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
 
         <!-- library versions -->
         <spring-boot.version>3.5.0</spring-boot.version>
@@ -71,7 +71,7 @@
         <lombook.version>1.18.38</lombook.version>
         <commons-io.version>2.19.0</commons-io.version>
         <commons-codec.version>1.18.0</commons-codec.version>
-        <commons-lang3.version>3.17.0</commons-lang3.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <bcprov-18.version>1.81</bcprov-18.version>
@@ -199,8 +199,8 @@
             </activation>
             <repositories>
                 <repository>
-                    <id>snapshots-repo</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                    <id>central-snapshots</id>
+                    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
                     <releases>
                         <enabled>false</enabled>
                     </releases>
@@ -252,14 +252,14 @@
                         </executions>
                     </plugin>
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.7.0</version>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.8.0</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>published</waitUntil>
                         </configuration>
                     </plugin>
                 </plugins>
