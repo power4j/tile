@@ -23,7 +23,7 @@ import com.power4j.tile.crypto.core.encode.HexEncoder;
 import com.power4j.tile.crypto.wrapper.InputDecoder;
 import com.power4j.tile.crypto.wrapper.OutputEncoder;
 import lombok.experimental.UtilityClass;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

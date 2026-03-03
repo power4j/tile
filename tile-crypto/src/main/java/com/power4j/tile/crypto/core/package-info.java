@@ -19,7 +19,7 @@
  * @date 2021/6/2
  * @since 1.0
  */
-@NonNullApi
+@NullMarked
 package com.power4j.tile.crypto.core;
 
-import org.springframework.lang.NonNullApi;
+import org.jspecify.annotations.NullMarked;

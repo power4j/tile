@@ -20,8 +20,6 @@ package com.power4j.tile.collection.tree;
 import com.power4j.tile.collection.tree.domain.Node;
 import com.power4j.tile.collection.tree.domain.NodeIdx;
 import com.power4j.tile.collection.tree.domain.TreeNode;
-import org.springframework.util.ObjectUtils;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -120,12 +118,12 @@ public class TreeMaker<ID, N extends Node<ID, N>> {
 	 * @return 返回根节点列表,如果数据源不包含根节点数据则返回empty
 	 */
 	protected List<N> makeTree(Function<Map<ID, N>, Map<ID, N>> rootSelect) {
-		if (ObjectUtils.isEmpty(data)) {
+		if (data == null || data.isEmpty()) {
 			return Collections.emptyList();
 		}
 		// 根节点
 		final Map<ID, N> roots = rootSelect.apply(data);
-		if (ObjectUtils.isEmpty(roots)) {
+		if (roots == null || roots.isEmpty()) {
 			return Collections.emptyList();
 		}
 		TreeNodeUtil.fetch(data, roots);

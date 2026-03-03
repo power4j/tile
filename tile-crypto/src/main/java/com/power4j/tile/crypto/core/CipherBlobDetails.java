@@ -18,7 +18,7 @@ package com.power4j.tile.crypto.core;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -36,8 +36,7 @@ public class CipherBlobDetails {
 
 	private final String mode;
 
-	@Nullable
-	private final byte[] iv;
+	@Nullable private final byte[] iv;
 
 	private final byte[] cipher;
 

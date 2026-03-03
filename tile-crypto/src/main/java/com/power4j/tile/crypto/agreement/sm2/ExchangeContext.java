@@ -28,7 +28,7 @@ import org.bouncycastle.crypto.params.ParametersWithID;
 import org.bouncycastle.crypto.params.SM2KeyExchangePrivateParameters;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.PrintStream;
 import java.math.BigInteger;
@@ -133,7 +133,7 @@ public class ExchangeContext {
 		}
 
 		public Builder ephemeralPrivateKeyBase64(String val) {
-			this.staticPrivateKey = Base64.decode(val);
+			this.ephemeralPrivateKey = Base64.decode(val);
 			return this;
 		}
 

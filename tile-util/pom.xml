@@ -16,57 +16,62 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.power4j.tile</groupId>
-        <artifactId>tile-build</artifactId>
-        <version>${revision}</version>
-        <relativePath>../tile-build/pom.xml</relativePath>
-    </parent>
-
-    <artifactId>tile-util</artifactId>
+  <parent>
+    <groupId>com.power4j.tile</groupId>
+    <artifactId>tile-build</artifactId>
     <version>${revision}</version>
-    <packaging>jar</packaging>
+    <relativePath>../tile-build/pom.xml</relativePath>
+  </parent>
 
-    <name>${project.artifactId}</name>
-    <description>tile util</description>
+  <artifactId>tile-util</artifactId>
+  <version>${revision}</version>
+  <packaging>jar</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+  <name>${project.artifactId}</name>
+  <description>tile util</description>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <environmentVariables>
-                        <TILE_TEST_KEY_1>TEST</TILE_TEST_KEY_1>
-                        <TILE_SYS_KEY_1>SYS</TILE_SYS_KEY_1>
-                    </environmentVariables>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <!-- test -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <environmentVariables>
+            <TILE_TEST_KEY_1>TEST</TILE_TEST_KEY_1>
+            <TILE_SYS_KEY_1>SYS</TILE_SYS_KEY_1>
+          </environmentVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

@@ -16,7 +16,7 @@
 
 package com.power4j.tile.crypto.core;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 

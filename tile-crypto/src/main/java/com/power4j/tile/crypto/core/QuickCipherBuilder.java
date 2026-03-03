@@ -20,7 +20,7 @@ import com.power4j.tile.crypto.bc.BouncyCastleQuickCipher;
 import com.power4j.tile.crypto.bc.Spec;
 import com.power4j.tile.crypto.utils.CryptoUtil;
 import com.power4j.tile.crypto.utils.Validate;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;

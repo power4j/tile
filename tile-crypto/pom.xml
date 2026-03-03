@@ -19,25 +19,24 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.power4j.tile</groupId>
-        <artifactId>tile-build</artifactId>
-        <version>${revision}</version>
-        <relativePath>../tile-build/pom.xml</relativePath>
-    </parent>
-
-    <artifactId>tile-crypto</artifactId>
+  <parent>
+    <groupId>com.power4j.tile</groupId>
+    <artifactId>tile-build</artifactId>
     <version>${revision}</version>
-    <packaging>jar</packaging>
+    <relativePath>../tile-build/pom.xml</relativePath>
+  </parent>
 
-    <name>${project.artifactId}</name>
-    <description>Crypto utils</description>
+  <artifactId>tile-crypto</artifactId>
+  <version>${revision}</version>
+  <packaging>jar</packaging>
+
+  <name>${project.artifactId}</name>
+  <description>Crypto utils</description>
 
   <dependencies>
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
-      <optional>true</optional>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -59,8 +58,18 @@
     </dependency>
     <!-- test -->
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

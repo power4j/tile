@@ -21,12 +21,13 @@ import com.power4j.tile.crypto.core.GeneralCryptoException;
 import com.power4j.tile.crypto.core.UncheckedCipher;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.codec.binary.Hex;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -74,7 +75,7 @@ public class CryptoUtil {
 
 	public byte[] decodeBase64(String val, @Nullable String errorMsg) {
 		try {
-			return Hex.decodeHex(val);
+			return Base64.getDecoder().decode(val);
 		}
 		catch (Exception e) {
 			throw wrapGeneralCryptoException(errorMsg, e);

@@ -18,7 +18,7 @@ package com.power4j.tile.crypto.core;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -38,8 +38,7 @@ public class CiphertextDetails {
 
 	private final String mode;
 
-	@Nullable
-	private final String iv;
+	@Nullable private final String iv;
 
 	private final String ciphertext;
 

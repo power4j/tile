@@ -17,7 +17,7 @@
 package com.power4j.tile.result;
 
 import com.power4j.tile.fmt.Display;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -37,11 +37,9 @@ public class Result<T, E> implements Display {
 
 	private final static Result<?, ?> EMPTY = new Result<>(new Object(), null);
 
-	@Nullable
-	private final T value;
+	@Nullable private final T value;
 
-	@Nullable
-	private final E error;
+	@Nullable private final E error;
 
 	/**
 	 * Provide a value
