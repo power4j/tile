@@ -17,7 +17,7 @@
 package com.power4j.tile.crypto.agreement.sm2;
 
 import lombok.Data;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * @author CJ (power4j@outlook.com)
@@ -32,7 +32,6 @@ public class ExchangeRequest {
 
 	private String userId;
 
-	@Nullable
-	private String confirmation;
+	@Nullable private String confirmation;
 
 }

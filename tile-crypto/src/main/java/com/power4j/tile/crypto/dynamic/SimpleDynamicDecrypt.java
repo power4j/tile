@@ -23,7 +23,7 @@ import com.power4j.tile.crypto.core.Slice;
 import com.power4j.tile.crypto.core.UncheckedCipher;
 import com.power4j.tile.crypto.core.Verified;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

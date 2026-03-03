@@ -18,9 +18,7 @@
  * @author CJ (power4j@outlook.com)
  * @since 1.0
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package com.power4j.tile.fmt;
 
-import org.springframework.lang.NonNullApi;
-import org.springframework.lang.NonNullFields;
+import org.jspecify.annotations.NullMarked;

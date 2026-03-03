@@ -17,7 +17,7 @@
 package com.power4j.tile.error;
 
 import com.power4j.tile.fmt.Display;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -32,8 +32,7 @@ public class ErrValue<T> implements Err {
 
 	protected final String message;
 
-	@Nullable
-	protected final Err source;
+	@Nullable protected final Err source;
 
 	public ErrValue(T value, @Nullable String message, @Nullable Err source) {
 		this.value = Objects.requireNonNull(value);

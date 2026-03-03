@@ -18,7 +18,7 @@ package com.power4j.tile.crypto.core;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -32,11 +32,9 @@ public class Verified<T> {
 
 	private final boolean pass;
 
-	@Nullable
-	private final T data;
+	@Nullable private final T data;
 
-	@Nullable
-	private final Throwable cause;
+	@Nullable private final Throwable cause;
 
 	public static <T> Verified<T> pass(T data) {
 		return new Verified<>(true, Objects.requireNonNull(data), null);

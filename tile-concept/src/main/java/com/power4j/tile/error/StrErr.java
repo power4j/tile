@@ -16,7 +16,7 @@
 
 package com.power4j.tile.error;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * @author CJ (power4j@outlook.com)
