@@ -76,7 +76,7 @@ public class ExchangeContext {
 	 */
 	public ExchangeStageStore stageStore() {
 		ExchangeStageStore store = new ExchangeStageStore();
-		store.setEphemeralPrivateKey(ephemeralPrivateKey.getD().toString(16));
+		store.setEphemeralPrivateKey(String.format("%064x", ephemeralPrivateKey.getD()));
 		store.setEphemeralPublicKey(Hex.toHexString(ephemeralPublicKey.getQ().getEncoded(COMPRESS)));
 		return store;
 	}
