@@ -46,6 +46,7 @@ target/
 
 # flattened pom
 .flattened-pom.xml
+dependency-reduced-pom.xml
 
 ### logs ####
 /logs/
@@ -89,3 +90,11 @@ docs/local/
 rebel.xml
 .metadata/
 settings-ossrh.xml
+
+# temp files(e.g. test,analyze ...)
+temp/
+tmp/
+
+# AI
+.claude/
+.mcp.json
