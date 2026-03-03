@@ -18,7 +18,7 @@ package com.power4j.tile.io;
 
 import com.power4j.tile.ffi.CStr;
 import com.power4j.tile.result.Result;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 

@@ -18,7 +18,7 @@ package com.power4j.tile.crypto.dynamic;
 
 import com.power4j.tile.crypto.bc.Spec;
 import com.power4j.tile.crypto.utils.Validate;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Function;
 import java.util.function.Supplier;

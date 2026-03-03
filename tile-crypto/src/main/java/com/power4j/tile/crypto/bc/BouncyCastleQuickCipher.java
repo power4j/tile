@@ -23,7 +23,7 @@ import com.power4j.tile.crypto.core.Slice;
 import com.power4j.tile.crypto.core.UncheckedCipher;
 import com.power4j.tile.crypto.core.Verified;
 import com.power4j.tile.crypto.utils.CryptoUtil;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -66,11 +66,12 @@ public class BouncyCastleQuickCipher implements QuickCipher {
 	@Override
 	public CipherBlobDetails encrypt(byte[] data, int offset, int length) throws GeneralCryptoException {
 		final IvParameterSpec ivParameter = ivParameterSpecSupplier.get();
+		final Slice slice = Slice.range(data, offset, length);
 		byte[] encrypted;
 		byte[] checksum;
 		try {
-			checksum = checksumCalculator.apply(data);
-			encrypted = oneStep(Cipher.ENCRYPT_MODE, keySupplier.get(), ivParameter, Slice.wrap(data));
+			checksum = checksumCalculator.apply(slice.unwrap());
+			encrypted = oneStep(Cipher.ENCRYPT_MODE, keySupplier.get(), ivParameter, slice);
 		}
 		catch (Exception e) {
 			throw CryptoUtil.wrapGeneralCryptoException(null, e);

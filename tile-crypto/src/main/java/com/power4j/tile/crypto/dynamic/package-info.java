@@ -19,7 +19,7 @@
  * @date 2021/6/2
  * @since 1.6
  */
-@NonNullApi
+@NullMarked
 package com.power4j.tile.crypto.dynamic;
 
-import org.springframework.lang.NonNullApi;
+import org.jspecify.annotations.NullMarked;

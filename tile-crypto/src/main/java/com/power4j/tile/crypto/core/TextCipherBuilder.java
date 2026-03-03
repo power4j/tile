@@ -24,7 +24,7 @@ import com.power4j.tile.crypto.core.encode.BufferEncoder;
 import com.power4j.tile.crypto.core.encode.HexEncoder;
 import com.power4j.tile.crypto.core.encode.UnicodeEncoder;
 import lombok.Builder;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import javax.crypto.Cipher;
 import java.security.GeneralSecurityException;

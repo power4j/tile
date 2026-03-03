@@ -17,7 +17,7 @@
 package com.power4j.tile.util;
 
 import lombok.experimental.UtilityClass;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -49,58 +49,50 @@ public class DateTimeUtil {
 	// ~ Converter
 	// ===================================================================================================
 
-	@Nullable
-	public LocalDateTime startDateTime(@Nullable LocalDate date) {
+	@Nullable public LocalDateTime startDateTime(@Nullable LocalDate date) {
 		if (date == null) {
 			return null;
 		}
 		return LocalDateTime.of(date, LocalTime.of(0, 0, 0));
 	}
 
-	@Nullable
-	public LocalDateTime endDateTime(@Nullable LocalDate date) {
+	@Nullable public LocalDateTime endDateTime(@Nullable LocalDate date) {
 		if (date == null) {
 			return null;
 		}
 		return LocalDateTime.of(date, LocalTime.of(23, 59, 59));
 	}
 
-	@Nullable
-	public Date toDate(@Nullable LocalDateTime localDateTime) {
+	@Nullable public Date toDate(@Nullable LocalDateTime localDateTime) {
 		return toDate(localDateTime, ZoneId.systemDefault());
 	}
 
-	@Nullable
-	public LocalDateTime toLocalDateTime(@Nullable Date date) {
+	@Nullable public LocalDateTime toLocalDateTime(@Nullable Date date) {
 		return toLocalDateTime(date, ZoneId.systemDefault());
 	}
 
-	@Nullable
-	public Date toDate(@Nullable LocalDateTime localDateTime, ZoneId zoneId) {
+	@Nullable public Date toDate(@Nullable LocalDateTime localDateTime, ZoneId zoneId) {
 		if (localDateTime == null) {
 			return null;
 		}
 		return Date.from(localDateTime.atZone(zoneId).toInstant());
 	}
 
-	@Nullable
-	public LocalDateTime toLocalDateTime(@Nullable Date date, ZoneId zoneId) {
+	@Nullable public LocalDateTime toLocalDateTime(@Nullable Date date, ZoneId zoneId) {
 		if (date == null) {
 			return null;
 		}
 		return date.toInstant().atZone(zoneId).toLocalDateTime();
 	}
 
-	@Nullable
-	public Date toDate(@Nullable LocalDateTime localDateTime, ZoneOffset offset) {
+	@Nullable public Date toDate(@Nullable LocalDateTime localDateTime, ZoneOffset offset) {
 		if (localDateTime == null) {
 			return null;
 		}
 		return Date.from(localDateTime.atOffset(offset).toInstant());
 	}
 
-	@Nullable
-	public LocalDateTime toLocalDateTime(@Nullable Date date, ZoneOffset offset) {
+	@Nullable public LocalDateTime toLocalDateTime(@Nullable Date date, ZoneOffset offset) {
 		if (date == null) {
 			return null;
 		}
@@ -110,32 +102,28 @@ public class DateTimeUtil {
 	// ~ Time Zone
 	// ===================================================================================================
 
-	@Nullable
-	public ZonedDateTime toZonedDateTime(@Nullable LocalDateTime dateTime, ZoneId zoneId) {
+	@Nullable public ZonedDateTime toZonedDateTime(@Nullable LocalDateTime dateTime, ZoneId zoneId) {
 		if (dateTime == null) {
 			return null;
 		}
 		return dateTime.atZone(zoneId);
 	}
 
-	@Nullable
-	public OffsetDateTime toOffsetDateTime(@Nullable LocalDateTime dateTime, ZoneOffset offset) {
+	@Nullable public OffsetDateTime toOffsetDateTime(@Nullable LocalDateTime dateTime, ZoneOffset offset) {
 		if (dateTime == null) {
 			return null;
 		}
 		return dateTime.atOffset(offset);
 	}
 
-	@Nullable
-	public ZonedDateTime toZonedDateTimeUtc(@Nullable LocalDateTime dateTime) {
+	@Nullable public ZonedDateTime toZonedDateTimeUtc(@Nullable LocalDateTime dateTime) {
 		if (dateTime == null) {
 			return null;
 		}
 		return toZonedDateTime(dateTime, ZoneOffset.UTC);
 	}
 
-	@Nullable
-	public LocalDateTime toLocalDateTime(@Nullable ZonedDateTime dateTime) {
+	@Nullable public LocalDateTime toLocalDateTime(@Nullable ZonedDateTime dateTime) {
 		if (dateTime == null) {
 			return null;
 		}

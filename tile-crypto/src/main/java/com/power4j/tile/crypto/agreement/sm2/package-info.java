@@ -18,7 +18,7 @@
  * @author CJ (power4j@outlook.com)
  * @since 1.0
  */
-@NonNullApi
+@NullMarked
 package com.power4j.tile.crypto.agreement.sm2;
 
-import org.springframework.lang.NonNullApi;
+import org.jspecify.annotations.NullMarked;

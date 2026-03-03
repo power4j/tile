@@ -17,7 +17,7 @@
 package com.power4j.tile.collection.tree.domain;
 
 import lombok.Data;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -36,11 +36,9 @@ public class TreeNode<ID> implements Node<ID, TreeNode<ID>>, Serializable {
 
 	private ID id;
 
-	@Nullable
-	private ID parentId;
+	@Nullable private ID parentId;
 
-	@Nullable
-	private List<TreeNode<ID>> children;
+	@Nullable private List<TreeNode<ID>> children;
 
 	public static <ID> TreeNode<ID> of(ID id, @Nullable ID parentId) {
 		TreeNode<ID> node = new TreeNode<>();
