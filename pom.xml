@@ -77,7 +77,7 @@
     <!-- test versions -->
     <junit.version>6.0.3</junit.version>
     <assertj.version>3.27.3</assertj.version>
-    <mockito.version>5.22.0</mockito.version>
+    <mockito.version>5.23.0</mockito.version>
   </properties>
 
   <build>
